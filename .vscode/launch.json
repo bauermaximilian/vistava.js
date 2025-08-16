@@ -1,0 +1,19 @@
+{
+   // These configurations assume a simple HTTP server running at the project root at port 5500.
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "type": "firefox",
+         "request": "launch",
+         "name": "Run examples in Firefox",
+         "url": "http://localhost:5500/examples/",
+         "webRoot": "${workspaceFolder}/examples/"
+      },
+      {
+         "type": "chrome",
+         "request": "launch",
+         "name": "Run examples in Chrome",
+         "url": "http://localhost:5500/examples/"
+      }
+   ]
+}

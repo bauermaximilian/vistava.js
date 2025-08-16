@@ -1,0 +1,8 @@
+[
+   "./Shared/RateLimiter.test.js",
+   "./Shared/CachedCollection.test.js.skip",
+   "./Components/TileGrid/Shared/TileGridLayout.test.js.skip",
+   "./Shared/ServiceContainer.test.js.skip",
+   "./Shared/EnumType.test.js.skip",
+   "./Shared/ObservableCollectionTranslator.test.js.skip"
+]

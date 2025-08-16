@@ -1,0 +1,20 @@
+{
+  "name": "vistava",
+  "version": "1.0.0",
+  "description": "A library for a multimedia viewer supporting flexible layouts and infinite scrolling.",
+  "license": "GPL-3.0-or-later",
+  "author": "Maximilian Bauer",
+  "type": "module",
+  "entryPoint": "./bundle/vistava.js",
+  "files": [
+    "./bundle/vistava.js",
+    "./bundle/vistava.svg"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "rollup": "^4.46.2"
+  }
+}

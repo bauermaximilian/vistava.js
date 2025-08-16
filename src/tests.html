@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!--
+   Create a "tests.json" file in the same directory as this HTML file.
+   This JSON file references the test JS files and can look like in the following example:
+   ["./Shared/Vector.test.js", "./Shared/Serializer.test.js", "./Shared/Enum.test.js.skip"]
+   This configuration would load the "Vector" and "Serializer" tests - the ".skip" suffix on an 
+   entry prevents the "Event" tests from executing.
+   Every test file can export one or more classes, where each public method represents 
+   one single unit test. These test methods - just like the class constructor - must not have
+   any parameters. The test methods may run synchronously or asynchronously (return a Promise).
+   When the test method executes without any errors, the test passed. Any output - preferably 
+   a string - will be displayed as "Result". If an (uncaught) error was thrown during the
+   test execution, the test failed - and the error will be displayed as "Result".
+   The test class gets reinstantiated after each test method run.
+-->
+<html>
+   <head>      
+      <title>Unit tests</title>
+      <style>
+         * {
+            --negative: hsl(0, 90%, 72%);
+            --positive: hsl(117, 68%, 68%);
+            --warning: hsl(51, 68%, 68%);
+            --info: hsl(219, 100%, 68%);
+            --primary: hsl(300, 9%, 96%);
+            --primary-disabled: hsl(300, 2%, 60%);
+            --border: hsl(27, 5%, 50%);
+            --background-hover: hsl(27, 10%, 21%);
+            --background: hsl(27, 10%, 17%);
+
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color: var(--primary);
+         }
+
+         body {
+            background-color: var(--background);
+            margin: 20px 20px;
+         }
+
+         header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+         }        
+         
+         nav {
+            margin-left:auto;
+            display:flex;
+            gap:10px;
+         }
+
+         header > h1 {
+            margin: 0;
+         }
+         header {
+            justify-content: flex-start;
+            gap: 10px;
+            padding-bottom:20px;
+         }
+
+         button {
+            background: none;
+            border: 1px solid var(--border);         
+            padding: 5px;
+            display: inline-flex;
+            align-items: center;
+         }
+         button:hover:not([disabled]) {
+            background-color: var(--background-hover);
+         }
+         button:is([disabled]) {
+            opacity: 0.5;
+         }
+
+         svg {
+            vertical-align: middle;
+         }
+         button > span {
+            margin: 0 5px;
+         }
+
+         button > svg {
+            height: 1em;
+            margin: 0 5px;
+         }
+
+         main > section {
+            border: 1px solid var(--border);
+            border-top: none;
+            padding: 20px 20px 20px 20px;
+         }
+
+         main > section:first-child {
+            border-top: 1px solid var(--border);
+         }
+
+         table {
+            width: 100%;
+         }
+
+         table, th, tr, td {
+            border: 1px solid var(--border);
+            border-collapse: collapse;
+         }
+
+         th, td {
+            padding:0 15px
+         }
+
+         td:first-child {
+            text-align: center;
+         }
+
+         th:nth-child(3) {
+            width: 100%;            
+         }
+      </style>
+
+      <svg style="display:none">
+         <defs>
+            <symbol id="start" 
+                    style="fill:var(--positive);stroke:none">
+               <polygon points="0,0 100,50 0,100"/>
+            </symbol>
+            <symbol id="stop" 
+                    style="fill:var(--negative);stroke:none">
+               <polygon points="0,0 100,0 100,100 0,100" />
+            </symbol>
+            <symbol id="check" 
+                    style="stroke:var(--positive);stroke-linecap:round;stroke-width:1em">
+               <polyline points="25,55 50,75"/>
+               <polyline points="50,75 80,20"/>
+            </symbol>
+            <symbol id="check-warning" 
+                    style="stroke:var(--warning);stroke-linecap:round;stroke-width:1em">
+               <polyline points="25,55 50,75"/>
+               <polyline points="50,75 80,20"/>
+            </symbol>
+            <symbol id="cross" 
+                    style="stroke:var(--negative);stroke-linecap:round;stroke-width:1em">
+               <polyline points="20,80 80,20" />
+               <polyline points="20,20 80,80" />               
+            </symbol>
+            <symbol id="dots" 
+                    style="stroke:var(--info);stroke-linecap:round;stroke-width:1em">
+               <polyline points="20,50 20,50"/>
+               <polyline points="50,50 50,50"/>
+               <polyline points="80,50 80,50"/>
+            </symbol>
+            <symbol id="dots-disabled" 
+                    style="stroke:var(--primary-disabled);stroke-linecap:round;stroke-width:1em">
+               <polyline points="20,50 20,50"/>
+               <polyline points="50,50 50,50"/>
+               <polyline points="80,50 80,50"/>
+            </symbol>
+         </defs>
+      </svg>
+   </head>
+   <body>
+      <script type="module">
+         // @ts-check
+         /** @typedef {("init"|"running"|"fail"|"success")} TestState */
+
+         class TestStatus {
+            /** @type {Date|undefined} */
+            lastExecution;
+            /** @type {number} */
+            runtime = 0;
+            /** @type {any|undefined} */
+            result;
+            /** @type {Error|undefined} */
+            error;
+            /** @type {TestState} */
+            state = "init";
+         }
+
+         class TestRunner {
+            /** @type {string} */
+            #name;
+            /** @type {string} */
+            #moduleUri;
+            /** @type {any} */
+            #tests = {};
+            /** @type {any} */
+            #status = {};
+            /** @type {boolean} */
+            #cancelRunningTests = false;
+            /** @type {(()=>void)[]} */
+            #onUpdate = [];
+            /** @type {TestState} */
+            #state = "init";
+
+            get name() { return this.#name; }
+            get status() { return this.#status; }
+            get onUpdate() { return this.#onUpdate; }
+            get state() { return this.#state; }
+            get count() { return Object.keys(this.#tests).length; }
+
+            /**
+             * @param {string} moduleUri
+             */
+            constructor(moduleUri) {
+               this.#moduleUri = moduleUri;
+               this.#name = moduleUri.substring(Math.max(0, moduleUri.lastIndexOf("/") + 1));
+            }
+
+            async discoverTestsAsync() {
+               let namespace;
+
+               try {
+                  // @ts-ignore
+                  namespace = await import(this.#moduleUri);
+               } catch (error) {
+                  this.#status = {};
+                  let errorStatus = this.#status["n/a"] = new TestStatus();
+                  errorStatus.error = new Error(
+                     `The test file "${this.#moduleUri}" couldn't be loaded: ${error?.message}`);
+                  this.#state = errorStatus.state = "fail";                  
+                  this.#triggerUpdate();
+                  return;
+               }
+
+               this.#tests = {};
+               this.#status = {};
+               this.#state = "init";
+               this.#triggerUpdate();
+
+               for (let memberKey of Object.keys(namespace)) {
+                  let member = namespace[memberKey];
+                  let constructor = member.prototype?.constructor;
+                  
+                  if (constructor !== undefined) {
+                     let methods = [];
+                     
+                     for (let methodKey of Object.getOwnPropertyNames(member.prototype)) {
+                        if (methodKey === "constructor") {
+                           continue;
+                        }
+                        let method = member.prototype[methodKey];
+
+                        methods.push(method);
+                        this.#status[this.#getTestCaseKey(memberKey, method)] = 
+                           new TestStatus();
+
+                        this.#triggerUpdate();
+                     }
+
+                     this.#tests[memberKey] = {
+                        constructor: constructor,
+                        methods: methods
+                     };
+                  }
+               }
+            }
+
+            async runTestsAsync() {
+               let testsKeys = Object.keys(this.#tests);
+               
+               this.#cancelRunningTests = false;
+               this.#state = "running";
+               this.#triggerUpdate();
+
+               let failed = false;
+               for (let testKey of testsKeys) {
+                  if (this.#cancelRunningTests) {
+                     this.#state = "init";
+                     this.#triggerUpdate();
+                     return;
+                  }
+
+                  let test = this.#tests[testKey];
+
+                  for (let testMethod of test.methods) {
+                     if (this.#cancelRunningTests) {
+                        this.#state = "init";
+                        this.#triggerUpdate();
+                        return;
+                     }
+
+                     let testCaseKey = this.#getTestCaseKey(testKey, testMethod);
+                     let testStatus = this.#status[testCaseKey];
+                     if (!testStatus) {
+                        this.#status[testCaseKey] = testStatus = new TestStatus();
+                     }
+
+                     let testInstance = new test.constructor();
+                     let testStart = performance.now();
+                     testStatus.state = "running";
+                     testStatus.lastExecution = new Date();
+                     this.#triggerUpdate();
+
+                     try {
+                        testStatus.result = testMethod.call(testInstance);
+                        if (testStatus.result instanceof Promise) {
+                           testStatus.result = await testStatus.result;
+                        }
+
+                        testStatus.runtime = performance.now() - testStart;
+                        testStatus.state = "success";
+                     } catch (error) {
+                        testStatus.runtime = performance.now() - testStart;
+                        testStatus.state = "fail";
+                        testStatus.error = error;
+                        failed = true;
+                     }
+
+                     this.#triggerUpdate();
+                  }
+               }
+
+               if (failed) {
+                  this.#state = "fail";
+               } else {
+                  this.#state = "success";
+               }
+               this.#triggerUpdate();
+            }
+
+            cancelRunningTests() {
+               this.#cancelRunningTests = true;
+            }
+
+            #triggerUpdate() {
+               for (let handler of this.#onUpdate) {
+                  handler.call(this);
+               }
+            }
+
+            #getTestCaseKey = (testKey, testMethod) => `${testKey}.${testMethod.name}`;
+         }
+
+         class TestRunnerView {
+            /** @type {HTMLElement} */
+            #elementMain;
+            /** @type {HTMLElement} */
+            #elementHeading;
+            /** @type {HTMLElement} */
+            #elementTable;
+            /** @type {TestRunner} */
+            #testRunner;
+            
+            get state() {
+               return this.#testRunner.state;
+            }
+
+            /** @type {(()=>void)|undefined} */
+            onStateChange;
+
+            /**
+             * @param {TestRunner} testRunner
+             * @param {HTMLElement} parent
+             */
+            constructor(testRunner, parent) {               
+               parent ??= document.body;
+               this.#elementMain = ViewUtils.appendNew("section", parent);
+               this.#testRunner = testRunner;
+
+               this.#elementHeading = ViewUtils.appendNew("header", this.#elementMain);
+               this.#elementTable = ViewUtils.appendNew("table", this.#elementMain);
+               this.#update();
+
+               this.#testRunner.onUpdate.push(() => this.#update());
+               this.#testRunner.onUpdate.push(() => this.onStateChange?.call(this));
+            }
+
+            #update() {
+               this.#elementHeading.replaceChildren();
+               this.#elementHeading.appendChild(
+                  ViewUtils.createStateIcon(this.#testRunner.state, "2em", this.#testRunner.count === 0));
+               ViewUtils.appendNew("h1", this.#elementHeading, this.#testRunner.name);
+
+               this.#elementTable.replaceChildren();
+               
+               let headingRow = ViewUtils.appendNew("tr", this.#elementTable);
+               ViewUtils.appendNew("th", headingRow, "Status");
+               ViewUtils.appendNew("th", headingRow, "Test");
+               ViewUtils.appendNew("th", headingRow, "Result");
+               ViewUtils.appendNew("th", headingRow, "Duration");
+
+               for (let testKey of Object.keys(this.#testRunner.status)) {
+                  let testStatus = this.#testRunner.status[testKey];
+
+                  let testRow = ViewUtils.appendNew("tr", this.#elementTable);
+                  let stateCell = ViewUtils.appendNew("td", testRow);
+                  stateCell.appendChild(
+                     ViewUtils.createStateIcon(testStatus.state, "1.24em"));
+                  ViewUtils.appendNew("td", testRow, testKey);
+                  ViewUtils.appendNew("td", testRow, 
+                     testStatus.error ?? testStatus.result ?? "");
+                  ViewUtils.appendNew("td", testRow, 
+                     `${Math.round(testStatus.runtime)}ms`);
+               }
+            }
+         }
+
+         class TestRunnersView {
+            #TESTS_FILE_URI = "./tests.json";
+
+            /** @type {HTMLElement} */
+            #elementMain;
+            /** @type {TestState} */
+            #state = "init";
+            /** @type {TestRunner[]} */
+            #testRunners = [];
+
+            get canRun() { return this.#testRunners.length > 0; }
+
+            get state() { return this.#state; }
+
+            /** @type {(()=>void)|undefined} */
+            onStateChange;
+
+            constructor() {
+               this.#elementMain = ViewUtils.appendNew("main", document.body);
+            }
+
+            async initializeAsync() {
+               /** @type {string[]} */ 
+               let testsUris;
+               try { 
+                  let testsRequest = await fetch(this.#TESTS_FILE_URI);
+                  if (!testsRequest.ok) {
+                     throw new Error(`The server returned status code ${testsRequest.status}.`);
+                  }
+                  testsUris = await testsRequest.json();
+                  if (!Array.isArray(testsUris)) {
+                     throw new Error("The loaded object is no valid array.");
+                  }
+               } catch (error) {
+                  let errorSpan = ViewUtils.appendNew("span", this.#elementMain,
+                     `Couldn't load test file URI array from "${this.#TESTS_FILE_URI}": ` + 
+                     error.message);
+                  errorSpan.style.color = "var(--negative)";
+                  this.#state = "fail";
+                  this.#onTestRunnerStateChange();
+                  return;
+               }
+
+               this.#testRunners = [];
+               for (let testUri of testsUris) {
+                  let testRunner = new TestRunner(testUri);
+                  this.#testRunners.push(testRunner);
+                  let testRunnerView = new TestRunnerView(testRunner, this.#elementMain);
+                  testRunnerView.onStateChange = () => {
+                     this.#onTestRunnerStateChange();
+                  };
+                  if (!testUri.endsWith(".skip")) {
+                     await testRunner.discoverTestsAsync();
+                  }
+               }
+            }
+
+            async runTestsAsync() {
+               for (let testRunner of this.#testRunners) {
+                  await testRunner.runTestsAsync();
+               }
+            }
+
+            stopTests() {
+               for (let testRunner of this.#testRunners) {
+                  testRunner.cancelRunningTests();
+               }
+            }
+
+            #onTestRunnerStateChange = () => {
+               let anyTests = this.#testRunners.length > 0;
+               let anyRunning = false;
+               let anyFailed = false;
+               let allSuccessful = true;
+               for (let testRunner of this.#testRunners) {
+                  if (testRunner.state === "running") {
+                     anyRunning = true;
+                     break;
+                  } else if (testRunner.state === "fail") {
+                     anyFailed = true;
+                  } else if (testRunner.state !== "success") {
+                     allSuccessful = false;
+                  }
+               }
+
+               if (anyRunning) {
+                  this.#state = "running";
+               } else if (anyFailed || !anyTests) {
+                  this.#state = "fail";
+               } else if (allSuccessful) {
+                  this.#state = "success";
+               } else {
+                  this.#state = "init";
+               }
+               this.onStateChange?.call(this);
+            };
+         }
+
+         class ButtonView {
+            /** @type {HTMLButtonElement} */
+            #elementMain;
+
+            /** @param {boolean} value */
+            set disabled(value) { 
+               this.#elementMain.disabled = value;
+            }
+
+            /** @type {(() => void)|undefined} */
+            onClick;
+
+            /**
+             * @param {HTMLElement} parent
+             * @param {string} label
+             * @param {string} iconSvgId
+             * @param {boolean} disabled
+             */
+            constructor(parent, label, iconSvgId, disabled) {
+               parent ??= document.body;
+               this.#elementMain = ViewUtils.appendNew("button", parent);
+               this.#elementMain.disabled = disabled;
+               this.#elementMain.addEventListener("click", () => this.onClick?.call(this));
+               ViewUtils.appendNew("span", this.#elementMain, label);
+               this.#elementMain.appendChild(ViewUtils.createIcon(iconSvgId));
+            }
+         }
+
+         class HeaderView {
+            /** @type {HTMLElement} */
+            #elementMain;
+            /** @type {SVGElement} */
+            #viewState;
+            /** @type {ButtonView} */
+            #buttonStart;
+            /** @type {ButtonView} */
+            #buttonStop;
+            /** @type {TestState} */
+            #state = "init";
+            
+            /** @type {(()=>Promise)|undefined} */
+            onStartButtonClickAsync;
+            /** @type {(()=>void)|undefined} */
+            onStopButtonClick;
+            
+            get state() { return this.#state; }
+            set state(value) {
+               this.#state = value;
+               this.#update();
+            }
+
+            get disabled() {
+               return this.#buttonStart.disabled && this.#buttonStop.disabled;
+            }
+            set disabled(value) {
+               if (value) {
+                  this.#buttonStart.disabled = this.#buttonStop.disabled = true;
+               } else {
+                  this.#buttonStart.disabled = false;
+                  this.#buttonStop.disabled = true;
+               }
+            }
+
+            constructor() {
+               this.#elementMain = ViewUtils.appendNew("header");
+               this.#elementMain.appendChild(
+                  this.#viewState = ViewUtils.createStateIcon(this.#state, "2em"));
+               ViewUtils.appendNew("h1", this.#elementMain, "Unit tests");
+
+               let navbar = ViewUtils.appendNew("nav", this.#elementMain);
+               this.#buttonStart = new ButtonView(navbar, "Start", "start", false);
+               this.#buttonStart.onClick = this.#onStartButtonClick;
+               this.#buttonStop = new ButtonView(navbar, "Stop", "stop", true);
+               this.#buttonStop.onClick = this.#onStopButtonClick;
+
+               this.#update();
+            }
+
+            #update() {
+               this.#viewState.remove();
+               this.#viewState = ViewUtils.createStateIcon(this.#state, "2em");
+               this.#elementMain.prepend(this.#viewState);
+               if (this.#state === "running") {
+                  this.#buttonStart.disabled = true;
+                  this.#buttonStop.disabled = false;
+               } else {
+                  this.#buttonStart.disabled = false;
+                  this.#buttonStop.disabled = true;
+               }
+            }
+
+            #onStartButtonClick = () => {
+               let promise = this.onStartButtonClickAsync?.call(this);
+               if (promise instanceof Promise) {
+                  promise.then(() => {
+                  });
+               }
+            };
+
+            #onStopButtonClick = () => {
+               this.onStopButtonClick?.call(this);
+            };
+         }
+
+         class MainView {
+            /** @type {HeaderView} */
+            #header;
+            /** @type {HTMLLinkElement} */
+            #faviconLink;
+            /** @type {TestRunnersView} */
+            #testRunners;
+
+            constructor() {
+               this.#header = new HeaderView();
+               this.#header.onStartButtonClickAsync = this.#onStartButtonClickAsync;
+               this.#testRunners = new TestRunnersView();
+               this.#testRunners.onStateChange = this.#onTestRunnersStateChange;
+            }
+
+            async initializeAsync(startTests) {
+               await this.#testRunners.initializeAsync();
+               if (!this.#testRunners.canRun) {
+                  this.#header.disabled = true;
+               }
+               if (startTests) {
+                  await this.#testRunners.runTestsAsync();
+               }
+            }
+
+            #onTestRunnersStateChange = () => {
+               this.#header.state = this.#testRunners.state;
+               this.#setFaviconStateSymbol(this.#testRunners.state);
+            };
+
+            #onStartButtonClickAsync = async () => {
+               await this.#testRunners.runTestsAsync();
+            };
+
+            #onStopButtonClick = () => {
+               this.#testRunners.stopTests();
+            };
+
+            #setFaviconStateSymbol(state) {
+               let faviconLink = document.createElement("link");
+               faviconLink.type = "image/svg+xml";
+               faviconLink.rel = "icon";
+               let svgSymbol = 
+                  document.querySelector(`symbol#${ViewUtils.getStateIconKey(state)}`);
+               if (svgSymbol == null) {
+                  throw new Error();
+               }
+               let style = getComputedStyle(svgSymbol);
+               let svgString = `
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" 
+                    fill="${style.fill}" stroke="${style.stroke}" 
+                    stroke-linecap="${style.strokeLinecap}" stroke-width="${style.strokeWidth}">
+                  ${svgSymbol.innerHTML}
+               </svg>`;
+               faviconLink.href = `data:image/svg+xml,${encodeURIComponent(svgString)}`;
+               
+               if (this.#faviconLink) {
+                  this.#faviconLink.remove();
+               }
+
+               document.head.appendChild(faviconLink);
+               this.#faviconLink = faviconLink;
+            }
+         }
+
+         class ViewUtils {
+            /**
+             * @template {HTMLElement} TElement
+             * @param {string} tagName
+             * @param {HTMLElement} [target]
+             * @param {string} [innerText]
+             * @returns {TElement}
+             */
+            static appendNew(tagName, target, innerText) {
+               let element = document.createElement(tagName);
+               if (innerText) {
+                  element.innerText = innerText;
+               }
+               (target ?? document.body).appendChild(element);
+               // @ts-ignore
+               return element;
+            }
+
+            /** 
+             * @param {TestState} state 
+             * @param {string} [dimensions]
+             * @param {boolean} [isWarning]
+             * @returns {SVGElement}
+             */
+            static createStateIcon(state, dimensions, isWarning) {
+               return ViewUtils.createIcon(ViewUtils.getStateIconKey(state, isWarning), dimensions);
+            }
+
+            /**
+             * @param {string} name
+             * @param {string} [dimensions]
+             * @returns {SVGElement}
+             */
+            static createIcon(name, dimensions) {
+               let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+               if (dimensions) {
+                  svgElement.setAttribute("height", dimensions);
+                  svgElement.setAttribute("width", dimensions);
+               }
+               svgElement.setAttribute("viewBox", "0 0 100 100");
+
+               let useElement = document.createElementNS("http://www.w3.org/2000/svg", "use");
+               useElement.setAttribute("href", `#${name}`);
+
+               svgElement.appendChild(useElement);
+
+               return svgElement;
+            }
+
+            /**
+             * @param {TestState} state
+             * @param {boolean} [isWarning]
+             * @returns {string}
+             */
+            static getStateIconKey(state, isWarning) {
+               switch (state) {
+                  case "running": return "dots";
+                  case "success": {
+                     if (isWarning) return "check-warning"
+                     else return "check";
+                  }
+                  case "fail": return "cross";
+                  default: return "dots-disabled"
+               }
+            }
+         }
+
+         let mainView = new MainView();
+         // @ts-ignore
+         await mainView.initializeAsync(true);         
+      </script>
+   </body>
+</html>
