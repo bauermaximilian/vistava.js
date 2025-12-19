@@ -40,6 +40,8 @@ export class GalleryTileView extends TileView {
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").MoveEventArgs} MoveEventArgs */
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").MoveEndEventArgs} MoveEndEventArgs */
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").MoveStartEventArgs} MoveStartEventArgs */
+   
+   /** @typedef {import("./TileDataField.js").TileListEntryType} TileListEntryType */
 
    /** @readonly @type {GalleryTileViewMovementController} */
    #movementController;
@@ -114,8 +116,9 @@ export class GalleryTileView extends TileView {
    #render() {
       const mediaType = this.presenter?.model.getDataAsString(TileDataField.mediaType) ?? "";
       const mediaUrl = this.presenter?.model.getDataAsString(TileDataField.mediaUrl) ?? "";
-      const isDisplayableInDetail = this.presenter?.model.getDataAsString(TileDataField.iconName) === null &&
-         this.presenter?.model.getDataAsString(TileDataField.targetQuery) === null;
+      /** @type {TileListEntryType} */ //@ts-ignore
+      const type = this.presenter?.model.getDataAsString(TileDataField.type) ?? "Media";
+      const isDisplayableInDetail = type === "Media";
       
       let transform = `translateX(${this.#movementController.offset.x}px) ` +
          `translateY(${this.#movementController.offset.y}px) ` +

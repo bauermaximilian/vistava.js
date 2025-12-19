@@ -2,8 +2,10 @@
 
 import { cu } from "../../../Utils/BrowserUtils.js";
 import { VU } from "../../../Utils/VectorUtils.js";
+import { GuiIconNames } from "../../GuiIcon/GuiIconModel.js";
 import { GuiIconPresenter } from "../../GuiIcon/GuiIconPresenter.js";
 import { GuiIconView } from "../../GuiIcon/GuiIconView.js";
+import { VideoController } from "../../Shared/VideoController.js";
 import { TileFocuses } from "../Shared/TileFocusType.js";
 import { TileDataField } from "./TileDataField.js";
 import { TilePresenter } from "./TilePresenter.js";
@@ -35,16 +37,20 @@ export class ThumbnailTileView extends TileView {
    
    /** @type {boolean} */
    #loadingFailed = false;
+   /** @type {boolean} */
+   #insetLabel = false;
 
    /**
     * @template {any} TEventArgs
     * @typedef {import("../../../Shared/Event.js").EventHandler<TEventArgs>} EventHandler<TEventArgs>
     */
 
-   /** 
+   /**
     * @template TValue
     * @typedef {import("../../../Shared/Event.js").ValueChangedEventArgs<TValue>} ValueChangedEventArgs<TValue>
     */
+   
+   /** @typedef {import("./TileDataField.js").TileListEntryType} TileListEntryType */
 
    constructor() {
       super();
@@ -62,7 +68,7 @@ export class ThumbnailTileView extends TileView {
 
       this.#renderOverlay();
       this.#renderThumbnailElement();
-      this.#renderLabel(this.#thumbnailElement instanceof GuiIconView);
+      this.#renderLabel();
    }
 
    #renderThumbnailElement() {
@@ -74,7 +80,8 @@ export class ThumbnailTileView extends TileView {
       
       let thumbnailType = this.presenter?.model.getDataAsString(TileDataField.thumbnailType) ?? null;
       let thumbnailUrl = this.presenter?.model.getDataAsString(TileDataField.thumbnailUrl) ?? null;
-      let iconName = this.presenter?.model.getDataAsString(TileDataField.iconName) ?? "cross";
+      /** @type {TileListEntryType} */ //@ts-ignore
+      let type = this.presenter?.model.getDataAsString(TileDataField.type) ?? "Media";
 
       /** @param {CSSStyleDeclaration} s */
       let initializeSharedStyles = s => {
@@ -99,7 +106,26 @@ export class ThumbnailTileView extends TileView {
          e?.removeEventListener("error", this.#handleOnContentLoadingFailed);
       };
 
-      if (thumbnailType?.startsWith("image") && thumbnailUrl !== null && !this.#loadingFailed) {
+      this.#insetLabel = false;
+      if (type?.includes("Collection")) {
+         this.#insetLabel = true;
+         this.#thumbnailElement = cu(this.#thumbnailElement, GuiIconView, this.root, (e, s) => {
+            initializeSharedStyles(s);
+            e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
+            e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
+            e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
+            if (type === "SiblingCollection") {
+               e.presenter.model.icon = GuiIconNames["collection-link"];
+            } else if (type === "ParentCollection") {
+               e.presenter.model.icon = GuiIconNames["collection-up"]
+            } else {
+               e.presenter.model.icon = GuiIconNames["collection"]
+            }
+         }, (e, s) => {            
+            updateSharedStyles(s, 1, 0.4);
+            s.color = hasFocus ? "#d8d8d8" : "#b7b7b7"
+         }, disposeThumbnailElement, true);  
+      } else if (thumbnailType?.startsWith("image") && thumbnailUrl !== null && !this.#loadingFailed) {
          this.#thumbnailElement = cu(this.#thumbnailElement, HTMLImageElement, this.root, (e, s) => {
             initializeSharedStyles(s);
             e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
@@ -110,18 +136,7 @@ export class ThumbnailTileView extends TileView {
          }, (e, s) => {
             updateSharedStyles(s, 1, 0.4);
          }, disposeThumbnailElement, true);
-      } else if (iconName !== null && iconName.trim().length > 0) {
-         this.#thumbnailElement = cu(this.#thumbnailElement, GuiIconView, this.root, (e, s) => {
-            initializeSharedStyles(s);
-            e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
-            e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
-            e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
-            e.presenter.model.icon = iconName;
-         }, (e, s) => {            
-            updateSharedStyles(s, 1, 0.4);
-            s.color = hasFocus ? "#d8d8d8" : "#b7b7b7"
-         }, disposeThumbnailElement, true);
-      } else {
+      }  else {
          disposeThumbnailElement(this.#thumbnailElement);
          this.#thumbnailElement?.remove();
          this.#thumbnailElement = null;
@@ -135,9 +150,7 @@ export class ThumbnailTileView extends TileView {
             let duration = this.presenter?.model.getDataAsNumber(TileDataField.mediaDuration);
             if (duration != null) {
                this.#overlayTextElement = cu(this.#overlayTextElement, HTMLParagraphElement, e, (e, s) => {
-                  let minutes = Math.floor(duration / 60).toLocaleString(undefined, { minimumIntegerDigits: 2 });
-                  let seconds = Math.round(duration % 60).toLocaleString(undefined, { minimumIntegerDigits: 2 });
-                  e.innerText = `${minutes}:${seconds}`;
+                  e.innerText = VideoController.formatSecondsAsTimeSpan(duration);
 
                   s.fontFamily = "-apple-system, \"Segoe UI\", Roboto, sans-serif";
                   s.fontSize = "14px";
@@ -172,9 +185,11 @@ export class ThumbnailTileView extends TileView {
    }
 
    /**
-    * @param {boolean} reserveLabelSpace 
+    * 
+    * @param {boolean} [reserveLabelSpace=false]
     */
-   #renderLabel(reserveLabelSpace) {
+   #renderLabel(reserveLabelSpace = false) {
+      const fontSize = 14;
       const paddingTop = 8;
       const paddingRight = 12;
       const paddingBottom = 0;
@@ -188,20 +203,33 @@ export class ThumbnailTileView extends TileView {
       if (labelText !== null) {
          this.#labelElement = cu(this.#labelElement, HTMLParagraphElement, this.root, (e, s) => {
             s.fontFamily = "-apple-system, \"Segoe UI\", Roboto, sans-serif";
-            s.fontSize = "14px";
+            s.fontSize = `${fontSize}px`;
             s.fontWeight = "600";
             s.color = "#b7b7b7";
             s.setProperty("-webkit-user-select", "none");
             s.userSelect = "none";
-            s.paddingTop =  `${paddingTop}px`;
-            s.paddingRight =  `${paddingRight}px`;
-            s.paddingBottom =  `${paddingBottom}px`;
-            s.paddingLeft =  `${paddingLeft}px`;
-            s.margin = "0";
+            s.marginTop =  `${paddingTop}px`;
+            s.marginRight =  `${paddingRight}px`;
+            s.marginBottom =  `${paddingBottom}px`;
+            s.marginLeft =  `${paddingLeft}px`;
+            s.padding = "0";
             s.textRendering = "optimizeSpeed";
-            s.textOverflow = "ellipsis";
-            s.overflow = "hidden";
             s.textAlign = "center"
+            s.position = "relative";
+
+            s.textOverflow = "ellipsis";
+            s.display = "-webkit-box";
+            s.overflow = "hidden";
+            s.setProperty("-webkit-line-clamp", "3");
+            s.setProperty("line-clamp", "3");
+            s.setProperty("-webkit-box-orient", "vertical");
+
+            if (this.#insetLabel) {
+               s.position = "absolute";
+               s.marginTop = `${paddingBottom}px`;
+               s.marginBottom = `${fontSize}px`;
+               s.left = s.right = s.bottom = "0px";
+            }
             e.innerText = labelText;
          });
       } else {

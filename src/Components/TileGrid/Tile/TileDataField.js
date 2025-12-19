@@ -2,6 +2,8 @@
 
 /** @typedef {keyof(TileDataField)} TileDataFieldKey */
 
+/** @typedef {("Media" | "ChildCollection" | "ParentCollection" | "SiblingCollection")} TileListEntryType */
+
 /**
  * Defines a collection of standard keys (with their expected types) of entries within
  * a {@link TileModel} data storage.
@@ -43,9 +45,10 @@ export const TileDataField = Object.freeze({
     */
    mediaPreviewType: "mediaPreviewType",
    /**
-    * Defines the name of a {@link GuiIcon}.
+    * Defines the type of the entry as {@link TileListEntryType}.
+    * If unspecified, the value "{@link TileListEntryType.Media}" is assumed.
     */
-   iconName: "iconName",
+   type: "type",
    /**
     * Defines a query that the user would be navigated to upon interacting with a tile.
     */
