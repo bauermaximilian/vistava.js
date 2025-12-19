@@ -744,15 +744,16 @@ class TileGridViewMovementController {
       }
 
       let offsetUser = this.#movementInputOffsetAgent.lastStep +
-         this.#scrollInputOffsetAgent.lastStep * positionGuardOverrideRatio +
-         this.#movementInputOffsetMomentumAgent.lastStep +
-         this.#scrollInputOffsetMomentumAgent.lastStep;
+      this.#scrollInputOffsetAgent.lastStep * positionGuardOverrideRatio +
+      this.#movementInputOffsetMomentumAgent.lastStep +
+      this.#scrollInputOffsetMomentumAgent.lastStep;
       let offsetInternal = this.#positionGuardAgent.lastStep +
-         this.#focussedTileOffsetAgent.lastStep;
-
+      this.#focussedTileOffsetAgent.lastStep;
+      
       // The farther the user tries to move the content out of bounds (or when the position guard 
       // is active), the more all movement besides the position guard is attenuated.
-      let offset = insideBoundsRatio * offsetUser + offsetInternal;      
+      let movementDampingFactor = Math.min(Math.max(Math.pow(1.6 * insideBoundsRatio - 0.6, 3), 0), 1);
+      let offset = movementDampingFactor * offsetUser + offsetInternal;      
       
       if (!(this.tileGridViewProperties?.movementLocked ?? true)) {
          // To prevent an infinite feedback loop or other weird behavior, the tile focus should only be

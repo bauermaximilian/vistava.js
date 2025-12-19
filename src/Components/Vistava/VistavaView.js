@@ -124,8 +124,8 @@ export class VistavaView extends PresenterView {
    }
 
    async #runTrimAndExtendAsync() {
-      const cycleWaitGridModified = 15;
-      const cycleWaitGridUnmodified = 150;
+      const cycleWaitGridModified = 5;
+      const cycleWaitGridUnmodified = 250;
 
       while (this.#shouldRunTrimOrExtendPromise) {
          let gridModified = false;
