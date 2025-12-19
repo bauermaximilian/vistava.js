@@ -19,6 +19,8 @@ export class VideoController {
    #initialPlaying = false;
    /** @type {number} */
    static #initialVolume = 1;
+   /** @type {boolean} */
+   static #initalLoop = true;
 
    get onUpdateVolume() { return this.#onUpdateVolume.event; }
    get onUpdatePosition() { return this.#onUpdatePosition.event; }
@@ -45,6 +47,7 @@ export class VideoController {
 
          this.#videoElement = value;
 
+         this.loop = VideoController.#initalLoop;
          this.muted = VideoController.#initialIsMuted;
          if (this.#initialPlaying) {
             this.play();
@@ -102,11 +105,11 @@ export class VideoController {
    }
 
    get position() { 
-      return this.#formatSecondsAsTimeSpan(this.positionSeconds); 
+      return VideoController.formatSecondsAsTimeSpan(this.positionSeconds); 
    }
 
    get remaining() {
-      return this.#formatSecondsAsTimeSpan(this.remainingSeconds);
+      return VideoController.formatSecondsAsTimeSpan(this.remainingSeconds);
    }
 
    get remainingSeconds() {
@@ -114,7 +117,19 @@ export class VideoController {
    }
 
    get duration() { 
-      return this.#formatSecondsAsTimeSpan(this.durationSeconds);
+      return VideoController.formatSecondsAsTimeSpan(this.durationSeconds);
+   }
+
+   get loop() {
+      return this.#videoElement?.loop ?? VideoController.#initalLoop;
+   }
+   set loop(value) {
+      Assert.boolean(value);
+      VideoController.#initalLoop = value;
+
+      if (this.#videoElement !== null && this.#videoElement.loop !== VideoController.#initalLoop) {         
+         this.#videoElement.loop = VideoController.#initalLoop;
+      }
    }
 
    get muted() { 
@@ -226,10 +241,12 @@ export class VideoController {
     * @param {number} seconds 
     * @returns {string}
     */
-   #formatSecondsAsTimeSpan(seconds) {
+   static formatSecondsAsTimeSpan(seconds) {
       let minutesExact = seconds / 60;
       let minutes = Math.floor(minutesExact);
       let minuteSeconds = Math.floor((minutesExact - minutes) * 60);
+      minutes += Math.floor(minuteSeconds / 60);
+      minuteSeconds = minuteSeconds % 60;
       return `${minutes.toString().padStart(2, "0")}:${minuteSeconds.toString().padStart(2, "0")}`;
    }
 
