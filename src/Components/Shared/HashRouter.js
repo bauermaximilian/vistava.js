@@ -53,6 +53,15 @@ export class HashRouter {
       return this.#searchParams;
    }
 
+   /** @type {string} */
+   get hash() {
+      return `${this.hashPathOnly}?${this.#searchParams.toString()}`;
+   }
+
+   get hashPathOnly() {
+      return `${HashRouter.#hashPrefix}${encodeURI(this.#pathname)}`;
+   }
+
    get autoUpdateWindowHash() {
       return this.#autoUpdateWindowHash;
    }
@@ -98,16 +107,13 @@ export class HashRouter {
    updateWindowHash(hideFromHistory) {
       this.#ignoreHashChanges = true;
 
-      let hash = 
-         `${HashRouter.#hashPrefix}${encodeURI(this.#pathname)}?${this.#searchParams.toString()}`;
+      let hash = this.hash;
 
       if ((hideFromHistory ?? this.#disableHistoryChanges) &&
          window.location.hash.trim().length > 0) {
          location.replace(hash);
-         //console.log(`Replaced window hash with ${hash}`);
       } else {
          location.assign(hash);
-         //console.log(`Assigned window hash with ${hash}`);
       }
 
       this.#ignoreHashChanges = false;
