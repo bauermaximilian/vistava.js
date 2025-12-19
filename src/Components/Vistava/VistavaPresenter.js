@@ -147,7 +147,7 @@ export class VistavaPresenter {
          if (state.query !== undefined && this.#model.query !== state.query) {
             eventArgs.newQuery = this.#model.query = state.query;
             if (cachedReferenceLayout !== null &&
-               this.#layoutTypes.getLayoutType(stateBeforeUpdate.view)?.restoreLayout) {
+               this.#layoutTypes.getLayoutType(stateBeforeUpdate.view)?.restoreLayout && (state?.index ?? 0) > 0) {
                this.#grid.setReferenceLayout(cachedReferenceLayout);
             } else {
                this.#grid.unsetReferenceLayout();
