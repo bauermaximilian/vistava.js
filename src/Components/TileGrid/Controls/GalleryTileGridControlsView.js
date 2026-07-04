@@ -10,6 +10,7 @@ import { GuiIconPresenter } from "../../GuiIcon/GuiIconPresenter.js";
 import { GuiIconView } from "../../GuiIcon/GuiIconView.js";
 import { TileGridView } from "../TileGridView.js";
 import { TileGridControlsView } from "./TileGridControlsView.js";
+import { InputDeviceTypes } from "../../Shared/UserInput/InputDeviceType.js";
 
 const tagName = "gallery-grid-controls";
 
@@ -36,6 +37,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	/** @readonly @type {number} */
 	#barTimeoutTime = 2500;
 	/** @readonly @type {number} */
+	#previousNextTimeoutTime = 2500;
+	/** @readonly @type {number} */
 	#statusTimeoutTime = 2500;
 
 	/** @readonly @type {VideoController} */
@@ -44,14 +47,20 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	/** @readonly @type {RateLimiter} */
 	#makeBarsVisibleLimiter = new RateLimiter(500, 1);
 	/** @readonly @type {RateLimiter} */
+	#makePreviousNextVisibleLimiter = new RateLimiter(500, 1);
+	/** @readonly @type {RateLimiter} */
 	#videoControllerUpdateLimiter = new RateLimiter(50, 1);
 
 	/** @type {boolean} */
 	#barsVisible = false;
 	/** @type {boolean} */
+	#previousNextVisible = false;
+	/** @type {boolean} */
 	#statusVisible = false;
 	/** @type {number?} */
 	#hideBarsTimeoutHandle = null;
+	/** @type {number?} */
+	#hidePreviousNextTimeoutHandle = null;
 	/** @type {number?} */
 	#hideStatusIconTimeoutHandle = null;
 	
@@ -68,6 +77,10 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	#buttonEllipsis = null;
 	/** @type {GuiIconView?} */
 	#buttonFullscreen = null;
+	/** @type {GuiIconView?} */
+	#buttonPrevious = null;
+	/** @type {GuiIconView?} */
+	#buttonNext = null;
 	/** @type {HTMLDivElement?} */
 	#progressPlayback = null;
 	/** @type {GuiIconView?} */
@@ -127,6 +140,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 			BrowserUtils.setSessionState(GalleryTileGridControlsView, sessionState);
 			this.#makeBarsVisible();
 		}
+
+		this.addEventListener("mousemove", this.#handleOnMouseMoved);
 	}
 
 	disconnectedCallback() {
@@ -134,6 +149,12 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 			clearTimeout(this.#hideBarsTimeoutHandle);
 			this.#hideBarsTimeoutHandle = null;
 		}
+		if (this.#hidePreviousNextTimeoutHandle !== null) {
+			clearTimeout(this.#hidePreviousNextTimeoutHandle);
+			this.#hidePreviousNextTimeoutHandle = null;
+		}
+
+		this.removeEventListener("mousemove", this.#handleOnMouseMoved);
 	}
 	
 	#render() {	
@@ -170,6 +191,39 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 
 		this.#renderStatusIcon();
 		this.#renderLoadingIndicator();
+		this.#renderPreviousNextButtons();
+	}
+
+	#renderPreviousNextButtons() {
+		let initializeButton = (/** @type {GuiIconView} */ e, /** @type {CSSStyleDeclaration} */ s) => {
+			s.width = s.height = "40px";
+			s.padding = "3px";
+			s.opacity = "0";
+			s.transition = "opacity 1s";
+			s.position = "absolute";
+			s.bottom = "calc(50vh - 20px)";
+			s.color = "rgba(255,255,255,70%)";
+			s.filter = "drop-shadow(0px 0px 2px black)"
+		}
+
+		this.#buttonPrevious = cu(this.#buttonPrevious, GuiIconView, this.root, (e, s) => {		
+			initializeButton(e, s);
+			e.presenter = new GuiIconPresenter();
+			e.presenter.model.isInteractive = true;
+			e.presenter.model.icon = "previous";
+			s.left = "15px"
+		}, (e, s) => {
+			s.opacity = this.#previousNextVisible ? "1" : "0";
+		});
+		this.#buttonNext = cu(this.#buttonNext, GuiIconView, this.root, (e, s) => {
+			initializeButton(e, s);
+			e.presenter = new GuiIconPresenter();
+			e.presenter.model.isInteractive = true;
+			e.presenter.model.icon = "next";
+			s.right = "15px";
+		}, (e, s) => {
+			s.opacity = this.#previousNextVisible ? "1" : "0";
+		});
 	}
 
 	#renderStatusIcon() {
@@ -338,6 +392,22 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 		}, this.#statusTimeoutTime);
 	}
 
+	#makePreviousNextVisible = () => {
+		this.#previousNextVisible = true;
+		this.#render();
+
+		if (this.#hidePreviousNextTimeoutHandle !== null) {
+			clearTimeout(this.#hidePreviousNextTimeoutHandle);
+			this.#hidePreviousNextTimeoutHandle = null;
+		}
+
+		this.#hidePreviousNextTimeoutHandle = setTimeout(() => {
+			this.#hidePreviousNextTimeoutHandle = null;
+			this.#previousNextVisible = false;
+			this.#render();
+		}, this.#previousNextTimeoutTime);
+	}
+
 	#makeBarsVisible = () => {
 		this.#barsVisible = true;
 		this.#render();
@@ -364,6 +434,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	/** @type {EventHandler<ValueChangedEventArgs<InputEventsGroup>>} */
 	#handleOnInputEventsGroupChanged = (args) => {
 		args.oldValue?.onClick.unsubscribe(this.#handleOnClick);
+		args.oldValue?.onDoubleClick.unsubscribe(this.#handleOnDoubleClick);
 		// args.oldValue?.onClickSecondary.unsubscribe(this.#handleOnClickSecondary);
 		args.oldValue?.onAction.unsubscribe(this.#handleOnAction);
 		args.oldValue?.onMoveStart.unsubscribe(this.#handleOnMoveStart);
@@ -373,6 +444,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 		args.oldValue?.onScrollEnd.unsubscribe(this.#handleOnMoveOrScrollEnd);
 
 		args.newValue?.onClick.subscribe(this.#handleOnClick);
+		args.newValue?.onDoubleClick.subscribe(this.#handleOnDoubleClick);
 		// args.newValue?.onClickSecondary.subscribe(this.#handleOnClickSecondary);
 		args.newValue?.onAction.subscribe(this.#handleOnAction);
 		args.newValue?.onMoveStart.subscribe(this.#handleOnMoveStart);
@@ -384,6 +456,12 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 
 	#handleOnLoadingIndicatorVisibilityChanged = () => {
 		this.#renderLoadingIndicator();
+	};
+
+	#handleOnMouseMoved = (/** @type {MouseEvent} */ e) => {
+		if (e.clientX < 50 || e.clientX > (window.screen.width - 50)) {
+			this.#makePreviousNextVisibleLimiter.executeThrottled(this.#makePreviousNextVisible);
+		}
 	};
 
 	#handleOnBarsInteractedWith = () => {
@@ -467,8 +545,25 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 				this.#videoController.play();
 			}
 			this.#render();
+		} else if (BrowserUtils.isInside(this.#buttonPrevious, args.position)
+			&& args.inputDeviceType === InputDeviceTypes.mouse) {
+			this.tileGridView.presenter?.focusMoveHorizontal(-1);
+		} else if (BrowserUtils.isInside(this.#buttonNext, args.position)
+			&& args.inputDeviceType === InputDeviceTypes.mouse) {
+			this.tileGridView.presenter?.focusMoveHorizontal(1);
 		} else {
 			args.noFurtherAction = false;
+		}
+	};
+
+	/** @type {EventHandler<ClickEventArgs>} */
+	#handleOnDoubleClick = (args) => {
+		if (this.tileGridView?.presenter == null) { return; }
+
+		if (BrowserUtils.isInside(this.#buttonPrevious, args.position)) {
+			args.noFurtherAction = true;
+		} else if (BrowserUtils.isInside(this.#buttonNext, args.position)) {
+			args.noFurtherAction = true;
 		}
 	};
 
