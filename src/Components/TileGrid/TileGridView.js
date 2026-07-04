@@ -433,7 +433,8 @@ export class TileGridView extends InteractivePresenterView {
             this.presenter.focusMoveHorizontal(args.horizontalTileOffset);
       } else if (args.verticalTileOffset !== null && args.verticalTileOffset !== 0) {
          if (!this.presenter.focusMoveVertical(args.verticalTileOffset)) {
-            if (args.verticalTileOffset > 0 &&
+            if (this.presenter.layout.type.tileFlow === TileFlows.vertical &&
+               args.verticalTileOffset > 0 &&
                this.presenter.layout.endPosition !== null &&
                (this.presenter.layout.endPosition > this.presenter.layout.containerLength)) {
                let endPosition = this.presenter.layout.endPosition;
