@@ -397,7 +397,7 @@ export class TileGridPresenter {
 
 	/**
 	 * Automatically unsets any currently assigned reference layout, optionally assigns a new one.
-	 * @param {TileGridLayoutType} layoutType 
+	 * @param {TileGridLayoutType} [layoutType]
 	 * @param {Vector} [size]
 	 * @param {TileGridLayoutBase | TileGridLayoutSnapshot} [referenceLayout]
 	 * @throws {ArgumentError}
@@ -416,7 +416,7 @@ export class TileGridPresenter {
 			throw new InvalidOperationError("One or more tiles couldn't be removed completely.");
 		}
 
-		this.#layout = new TileGridLayout(layoutType, size ?? this.#layout.size);
+		this.#layout = new TileGridLayout(layoutType ?? this.#layout.type, size ?? this.#layout.size);
 
 		if (referenceLayout != null) {
 			//@ts-ignore

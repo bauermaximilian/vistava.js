@@ -281,6 +281,11 @@ export class TileGridLayout extends TileGridLayoutBase {
 	get firstNonEmptyColumn() { return this.#firstNonEmptyColumn; }
 	get lastNonEmptyColumn() { return this.#lastNonEmptyColumn; }
 	get size() { return this.#size; }
+	get hasDisbalancedStartRow() {
+		return this.#indexMinimum === 0 &&
+			this.#startPosition !== null && this.#startPositionMaximum !== null &&
+			Math.abs(this.#startPositionMaximum - this.#startPosition) > 1;
+	}
 
 	/** @typedef {import("../../../Utils/RectangleUtils.js").Rectangle} Rectangle */
 	/** @typedef {import("../../../Utils/VectorUtils.js").Vector} Vector */
