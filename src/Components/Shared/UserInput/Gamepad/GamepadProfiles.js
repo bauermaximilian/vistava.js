@@ -79,4 +79,21 @@ export const GamepadProfiles = Object.freeze([
       p.axisActivationTreshold = 0.2;
       p.axisActionTriggerTreshold = 0.65;
    }),
+   new GamepadProfile(/8BitDo Micro gamepad/i, p => {
+      p.axisActions.set("0-", "up");//D-Pad axis
+      p.axisActions.set("0", "down");//D-Pad axis
+      p.axisActions.set("1-", "right");//D-Pad axis
+      p.axisActions.set("1", "left");//D-Pad axis
+      p.buttonActions.set("0", "up");//A
+      p.buttonActions.set("1", "right");//B
+      p.buttonActions.set("3", "left");//X
+      p.buttonActions.set("4", "down");//Y
+      p.buttonActions.set("6", "confirm");//L1
+      p.buttonActions.set("7", "confirm");//R1
+      p.buttonActions.set("8", "back");//L2
+      p.buttonActions.set("9", "back");//R2
+      p.buttonActions.set("10", "zoom");//-
+      p.buttonActions.set("11", "zoom");//+
+      p.buttonActions.set("12", "fullscreen");//Select
+   })
 ]);
