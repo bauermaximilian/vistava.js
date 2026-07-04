@@ -148,7 +148,7 @@ export class ThumbnailTileView extends TileView {
       if (mediaType?.startsWith("video")) {
          this.#overlayElement = cu(this.#overlayElement, HTMLDivElement, this.root, (e, s) => {
             let duration = this.presenter?.model.getDataAsNumber(TileDataField.mediaDuration);
-            if (duration != null) {
+            if (duration != null && duration > 0) {
                this.#overlayTextElement = cu(this.#overlayTextElement, HTMLParagraphElement, e, (e, s) => {
                   e.innerText = VideoController.formatSecondsAsTimeSpan(duration);
 
@@ -174,7 +174,8 @@ export class ThumbnailTileView extends TileView {
             s.alignItems = "center";
             s.right = "8px";
             s.transform = "translateY(-22px)";
-            s.filter = "drop-shadow(0px 0px 1px black)";
+            s.textShadow = "rgb(0 0 0 / 75%) -1px -1px 0px, rgb(0 0 0 / 75%) 1px -1px 0px, " +
+               "rgb(0 0 0 / 75%) -1px 1px 0px, rgb(0 0 0 / 75%) 1px 1px 0px";
          }, null, null, true);
       } else {
          this.#overlayElement?.remove();
