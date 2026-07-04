@@ -115,7 +115,7 @@ export class ThumbnailTileView extends TileView {
             e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
             e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
             if (type === "SiblingCollection") {
-               e.presenter.model.icon = GuiIconNames["collection-link"];
+               e.presenter.model.icon = GuiIconNames["collection-play"];
             } else if (type === "ParentCollection") {
                e.presenter.model.icon = GuiIconNames["collection-up"]
             } else {
