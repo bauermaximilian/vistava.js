@@ -5,6 +5,7 @@ import { EventController } from "../../Shared/Event.js";
 import { ContextMenuModel } from "./ContextMenuModel.js";
 import { ContextMenuEntryModel } from "./ContextMenuEntryModel.js";
 import { ContextMenuEntryPresenter } from "./ContextMenuEntryPresenter.js";
+import { MathUtils } from "../../Utils/MathUtils.js";
 
 /**
  * @typedef {object} ContextMenuEntryEventArgs
@@ -40,6 +41,10 @@ export class ContextMenuPresenter {
    #entryFocus = null;
    /** @type {ContextMenuModel} */
    #model = new ContextMenuModel();
+   /** @type {number?} */
+   #lastOpenedTimestamp = null;
+   /** @type {number?} */
+   #lastClosedTimestamp = null;
 
    /** @type {EventController<void>} */
    #onMenuElementsChanged = new EventController();
@@ -89,11 +94,16 @@ export class ContextMenuPresenter {
       if (focusFirstEntry && entries.length > 0) {
          this.focusEntry(entries[0].model);
       }
+
+      this.#lastOpenedTimestamp = performance.now();
    }
 
    close() {
-      this.clearFocus();
-      this.#model.apply({ entries: [], sourceBounds: null });
+      if (this.entries.length > 0) {
+         this.clearFocus();
+         this.#model.apply({ entries: [], sourceBounds: null });
+         this.#lastClosedTimestamp = performance.now();
+      }
    }
 
    /**
@@ -125,7 +135,10 @@ export class ContextMenuPresenter {
       if (this.#entryPresenters.length > 0) {
          for (let i = 0; i < this.#entryPresenters.length; i++) {
             if (this.#entryPresenters[i].focussed) {
-               this.focusEntry(this.#entryPresenters[(i + offset) % this.#entryPresenters.length].model);
+               let entry = this.#entryPresenters[MathUtils.moduloUnsigned(i + offset, this.#entryPresenters.length)];
+               if (entry != null) {
+                  this.focusEntry(entry.model);
+               }
                return;
             }
          }      
@@ -139,6 +152,24 @@ export class ContextMenuPresenter {
    activateEntry(entry) {
       Assert.class(entry, ContextMenuEntryModel, "entry");
       this.#onEntryActivated.trigger({ entry });
+   }
+
+   /**
+    * @param {number} treshold 
+    * @returns {boolean}
+    */
+   wasJustOpened(treshold = 250) {
+      return this.#lastOpenedTimestamp != null &&
+         (performance.now() - this.#lastOpenedTimestamp) < treshold;
+   }
+
+   /**
+    * @param {number} treshold 
+    * @returns {boolean}
+    */
+   wasJustClosed(treshold = 250) {
+      return this.#lastClosedTimestamp != null &&
+         (performance.now() - this.#lastClosedTimestamp) < treshold;
    }
 
    /** @type {EventHandler<import("../../Shared/Event.js").FieldsChangedEventArgs<ContextMenuModel>>} */

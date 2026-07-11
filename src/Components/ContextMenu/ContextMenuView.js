@@ -28,12 +28,22 @@ export class ContextMenuView extends InteractivePresenterView {
    /** @typedef {import("../Shared/UserInput/InputEventsGroupController.js").MoveEndEventArgs} MoveEndEventArgs */
    /** @typedef {import("../Shared/UserInput/InputEventsGroupController.js").ScrollEventArgs} ScrollEventArgs */
    
-   static get tagName() { return tagName; }
+   /** @type {boolean} */
+   #preferAlignmentLeft = false;
+   /** @type {boolean} */
+   #preferAlignmentAbove = false;
 
    /** @type {HTMLElement} */
    #menuElement;
    /** @type {Map<ContextMenuEntryModel, ContextMenuEntryView>} */
    #menuEntries = new Map();
+   
+   static get tagName() { return tagName; }
+   
+   get preferAlignmentLeft() { return this.#preferAlignmentLeft; }
+   set preferAlignmentLeft(value) { this.#preferAlignmentLeft = value; }
+   get preferAlignmentAbove() { return this.#preferAlignmentAbove; }
+   set preferAlignmentAbove(value) { this.#preferAlignmentAbove = value; }
 
    constructor() {
       super(ContextMenuPresenter);
@@ -53,6 +63,7 @@ export class ContextMenuView extends InteractivePresenterView {
          s.margin = "1px";
          s.borderRadius = "8px";
          s.border = "1px solid rgb(69 69 69)";
+         s.overflow = "hidden";
       });
 
       this.onPresenterChanged.subscribe(this.#handleOnPresenterChanged);
@@ -67,37 +78,48 @@ export class ContextMenuView extends InteractivePresenterView {
     */
    #calculateMenuBounds(sourceBounds, menuSizeNatural, parentContainerBounds) {
       let sourceIsElement = (sourceBounds != null && sourceBounds.width > 0 && sourceBounds.height > 0);
-      let menuSizeAdjusted = sourceIsElement ? 
+      let menuSizeAdjusted = sourceIsElement ?
          VU.new(Math.max(sourceBounds?.width ?? 0, menuSizeNatural.x), menuSizeNatural.y) : menuSizeNatural;
 
       let verticalAlignX = sourceBounds?.x ?? 0;
       let verticalAlignAboveTargetY = (sourceBounds?.y ?? 0) - menuSizeNatural.y - (sourceBounds?.height ?? 0);
       let verticalAlignBelowTargetY = (sourceBounds?.y ?? 0) + (sourceBounds?.height ?? 0);
-      let horizontalAlignLeftOfTargetX = (sourceBounds?.x ?? 0) - menuSizeNatural.x;
-      let horizontalAlignRightOfTargetX = (sourceBounds?.x ?? 0) + (sourceBounds?.width ?? 0);
-      let horizontalAlignY = sourceBounds?.y ?? 0;
+      let horizontalAlignLeftOfTargetX = (sourceBounds?.x ?? 0) - menuSizeNatural.x + (sourceBounds?.width ?? 0);
 
-      if (sourceIsElement) {
-         let menuBoundsBelow = RU.new(verticalAlignX, verticalAlignBelowTargetY,
-            menuSizeAdjusted.x, menuSizeAdjusted.y);
-         let menuBoundsAbove = RU.new(verticalAlignX, verticalAlignAboveTargetY,
-            menuSizeAdjusted.x, menuSizeAdjusted.y);
-         if (RU.contains(parentContainerBounds, menuBoundsBelow)) {
-            return menuBoundsBelow;
+      let menuBoundsBelowLeft = RU.new(horizontalAlignLeftOfTargetX, verticalAlignBelowTargetY,
+         menuSizeAdjusted.x, menuSizeAdjusted.y);
+      let menuBoundsBelowRight = RU.new(verticalAlignX, verticalAlignBelowTargetY,
+         menuSizeAdjusted.x, menuSizeAdjusted.y);
+      let menuBoundsAboveLeft = RU.new(horizontalAlignLeftOfTargetX, verticalAlignAboveTargetY,
+         menuSizeAdjusted.x, menuSizeAdjusted.y);
+      let menuBoundsAboveRight = RU.new(verticalAlignX, verticalAlignAboveTargetY,
+         menuSizeAdjusted.x, menuSizeAdjusted.y);
+         
+      let candidates = [];
+      if (this.#preferAlignmentLeft) {
+         if (this.#preferAlignmentAbove) {
+            candidates.push(menuBoundsAboveLeft);
+            candidates.push(menuBoundsAboveRight);
          } else {
-            return menuBoundsAbove;
+            candidates.push(menuBoundsBelowLeft);
+            candidates.push(menuBoundsBelowRight);            
          }
       } else {
-         let menuBoundsRight = RU.new(horizontalAlignRightOfTargetX, horizontalAlignY,
-            menuSizeNatural.x, menuSizeNatural.y);
-         let menuBoundsLeft = RU.new(horizontalAlignLeftOfTargetX, horizontalAlignY,
-            menuSizeNatural.x, menuSizeNatural.y);
-         if (RU.contains(parentContainerBounds, menuBoundsRight)) {
-            return menuBoundsRight;
+         if (this.#preferAlignmentAbove) {
+            candidates.push(menuBoundsAboveRight);
+            candidates.push(menuBoundsAboveLeft);
          } else {
-            return menuBoundsLeft;
+            candidates.push(menuBoundsBelowRight);            
+            candidates.push(menuBoundsBelowLeft);
          }
       }
+
+      for (let candidate of candidates) {
+         if (RU.contains(parentContainerBounds, candidate)) {
+            return candidate;
+         }
+      }
+      return candidates[0];
    }
 
    /** @type {EventHandler<import("../../Shared/Event.js").ValueChangedEventArgs<ContextMenuPresenter>>} */
@@ -132,7 +154,7 @@ export class ContextMenuView extends InteractivePresenterView {
          }
       }
 
-      this.#menuElement.style.visibility = "visible";
+      this.#menuElement.style.visibility = this.#menuEntries.size > 0 ? "visible" : "hidden";
    };
 
    /** @type {EventHandler<void>} */
