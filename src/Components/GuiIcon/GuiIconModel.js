@@ -64,6 +64,7 @@ export class GuiIconModel {
 
 /** @typedef {keyof(GuiIconNames)} GuiIconName */
 export const GuiIconNames = Object.freeze({
+   "extension": "extension",
    "collection-play": "collection-play",
    "collection-list": "collection-list",
    "collection-link": "collection-link",
