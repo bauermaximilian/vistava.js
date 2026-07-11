@@ -16,7 +16,7 @@ export class VistavaModel {
       if (value !== this.#query) {
          this.#query = value;
          this.#onQueryUpdated.trigger();
-         this.#initializeCollection(true);
+         this.reset(true);
       }
    }
 
@@ -51,7 +51,7 @@ export class VistavaModel {
       this.#collectionFactory = collectionFactory;
       this.#gridModel = grid;
       
-      this.#initializeCollection(false);
+      this.reset(false);
    }
 
    /**
@@ -87,11 +87,11 @@ export class VistavaModel {
          throw new ArgumentError("The tile with the specified index can't be removed.");
       }
    }
-
+   
    /**
     * @param {boolean} clearGrid 
     */
-   #initializeCollection(clearGrid) {
+   reset(clearGrid) {
       let collectionRetriever = this.#collectionFactory(this.#query);
       this.#collection = new CachedCollection(collectionRetriever);
       if (clearGrid) {

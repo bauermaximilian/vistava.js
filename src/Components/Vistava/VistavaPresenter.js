@@ -125,6 +125,18 @@ export class VistavaPresenter {
       this.#subscribeEvents();
    }
 
+   reset() {
+      this.#unsubscribeEvents();
+
+      this.#layoutCache.clear();
+      this.#grid.unsetReferenceLayout();
+      this.#grid.reset(undefined, this.#grid.layout.size, undefined);
+      this.#model.reset(true);
+      this.#onStateUpdated.trigger({ newIndex: 0, newQuery: "", newView: this.layoutTypes.defaultLayoutType.identifier });
+
+      this.#subscribeEvents();
+   }
+
    /**
     * @param {VistavaPresenterStateInit} state
     */

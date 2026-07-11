@@ -43,6 +43,8 @@ export class VistavaView extends PresenterView {
    get onQueryChangeRequested() { return this.#onQueryChangeRequested.event; }
    get onBack() { return this.#onBack.event; }
 
+   get inputManager() { return this.#inputManager; }
+
    /** @template T @typedef {import("../../Shared/Event.js").EventHandler<T>} EventHandler<T> */
    /** @template T @typedef {import("../../Shared/Event.js").ValueChangedEventArgs<T>} ValueChangedEventArgs<T> */
    /** @template T @typedef {import("../../Utils/ClassUtils.js").ClassType<T>} ClassType<T> */
@@ -83,9 +85,9 @@ export class VistavaView extends PresenterView {
    constructor() {
       super(VistavaPresenter, true);
 
-      this.#inputManager.registerInputEventGroup(TileGridControlsView, 1);
-      this.#inputManager.registerInputEventGroup(TileView, 2);
-      this.#inputManager.registerInputEventGroup(TileGridView, 3);
+      this.#inputManager.registerInputEventGroup(TileGridControlsView, 2);
+      this.#inputManager.registerInputEventGroup(TileView, 3);
+      this.#inputManager.registerInputEventGroup(TileGridView, 4);
 
       this.onPresenterChanged.subscribe(this.#handleOnPresenterChanged);      
    } 
