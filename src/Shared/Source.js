@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { AbstractMemberNotImplementedError } from "../Errors/AbstractMemberNotImplementedError.js";
-import { Assert } from "./Assert.js";
 
 /** 
  * @template [TConfig = SourceConfiguration]
@@ -9,8 +8,9 @@ import { Assert } from "./Assert.js";
  */
 
 /**
+ * Defines a simple configuration object with properties that are used to control the behaviour
+ * of the source instance. For the base {@link Source} class, this is just an empty object.
  * @typedef {object} SourceConfiguration
- * @property {string} identifier
  */
 
 /**
@@ -18,23 +18,20 @@ import { Assert } from "./Assert.js";
  * the signature of {@link SourceConstructor}.
  */
 export class Source {
-   get identifier() { return this.#identifier; }
-
    /** 
     * @template {object} TValue
     * @typedef {import("./CachedCollection.js").CollectionRetrieverConstructor<TValue>
     * } CollectionRetrieverConstructor<TValue>
     */
 
-   /** @type {string} */
-   #identifier;
+   /** @virtual @type {string} */
+   get name() { return this.constructor.name; }
 
    /**
-    * @param {SourceConfiguration} configuration 
+    * @param {SourceConfiguration} configuration Defines the configuration for the source.
+    * For the {@link Source} base class, this is just an empty object.
     */
    constructor(configuration) {
-      Assert.stringNotEmptyOrWhitespacesOnly(configuration.identifier, "configuration.identifier");
-      this.#identifier = configuration.identifier;
    }
 
    /** @abstract @type {CollectionRetrieverConstructor<object>} */
