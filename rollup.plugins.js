@@ -30,6 +30,9 @@ export function copyAsset(sourcePath, targetPath) {
    return {
       name: "copy-asset",
       async generateBundle() {
+         try {
+            await fs.mkdir(path.dirname(targetPath, { recursive: true }));
+         } catch { /* If the "dist" directory already exists, just don't create it. */ }
          await fs.copyFile(sourcePath, targetPath, fs.constants.COPYFILE_FICLONE);
          this.info(`Copied asset "${sourcePath}" to "${targetPath}".`);
       },
