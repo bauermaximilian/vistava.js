@@ -61,11 +61,21 @@ export class EventController {
 
    /**
     * Triggers the {@link EventController.event} of the current instance.
-    * @param {TEventArgs} args 
+    * @param {TEventArgs} args
+    * @param {boolean} [throwHandlerExceptions=false] 
     * @throws {ObjectDisposedError}
+    * @throws {Error}
     */
-   trigger(args) {
-      this.#handlers.trigger(args);
+   trigger(args, throwHandlerExceptions = false) {
+      try {
+         this.#handlers.trigger(args);
+      } catch (error) {
+         if (throwHandlerExceptions) {
+            throw error;
+         } else {
+            console.error("Event subscriber caused unhandled exception: " + error);
+         }
+      }
    }
 
    dispose() {

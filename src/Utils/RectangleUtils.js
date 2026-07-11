@@ -188,17 +188,18 @@ export class RectangleUtils {
    static contains(outerRectangle, inner) {
       Assert.rectangle(outerRectangle, "outerRectangle");
 
-      if (VU.isVector(inner)) {
-         return inner.x >= outerRectangle.x &&
-            inner.y >= outerRectangle.y &&
-            inner.x <= (outerRectangle.x + outerRectangle.width) &&
-            inner.y <= (outerRectangle.y + outerRectangle.height);
-      } else {
+      if (RectangleUtils.isRectangle(inner)) {
          Assert.rectangle(inner, "innerRectangle");
          return inner.x >= outerRectangle.x &&
             inner.y >= outerRectangle.y &&
             (inner.x + inner.width) <= (outerRectangle.x + outerRectangle.width) &&
             (inner.y + inner.height) <= (outerRectangle.y + outerRectangle.height);
+      } else {
+         Assert.vector(inner, "position");
+         return inner.x >= outerRectangle.x &&
+            inner.y >= outerRectangle.y &&
+            inner.x <= (outerRectangle.x + outerRectangle.width) &&
+            inner.y <= (outerRectangle.y + outerRectangle.height);         
       }
    }
 

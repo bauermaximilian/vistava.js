@@ -75,6 +75,8 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    #handleOnClick = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
 
+      if (args.noFurtherAction) { return; }
+
       let focussedTileIndex = this.#updateFocusToPosition(args.position);
       if (focussedTileIndex !== null) {
          this.#onTileActivated.trigger({ tileIndex: focussedTileIndex });
@@ -86,6 +88,8 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    #handleOnClickSecondary = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
 
+      if (args.noFurtherAction) { return; }
+
       this.#updateFocusToPosition(args.position);
 
       args.noFurtherAction = true;
@@ -94,6 +98,8 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    /** @type {EventHandler<ActionEventArgs>} */
    #handleOnAction = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
+
+      if (args.noFurtherAction) { return; }
 
       if (args.action === "confirm" && this.tileGridView.presenter.focussedTileIndex !== null) {
          if (!this.tileGridView.presenter.focusVisible) {

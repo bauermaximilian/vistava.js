@@ -492,6 +492,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	#handleOnAction = (args) => {
 		if (this.tileGridView?.presenter == null) { return; }
 
+		if (args.noFurtherAction) { return; }
+
 		args.noFurtherAction = true;
 		if (args.action === "back") {
 			this.#onBack.trigger();			
@@ -523,6 +525,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	/** @type {EventHandler<ClickEventArgs>} */
 	#handleOnClick = (args) => {
 		if (this.tileGridView?.presenter == null) { return; }
+
+		if (args.noFurtherAction) { return; }
 		
 		args.noFurtherAction = true;
 		if (BrowserUtils.isInside(this.#buttonBack, args.position)) {
@@ -559,6 +563,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	/** @type {EventHandler<ClickEventArgs>} */
 	#handleOnDoubleClick = (args) => {
 		if (this.tileGridView?.presenter == null) { return; }
+
+		if (args.noFurtherAction) { return; }
 
 		if (BrowserUtils.isInside(this.#buttonPrevious, args.position)) {
 			args.noFurtherAction = true;

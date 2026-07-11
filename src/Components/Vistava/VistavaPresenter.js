@@ -244,7 +244,9 @@ export class VistavaPresenter {
          throw new ArgumentError();
       }
 
-      target.presenter = this.#grid;
+      if (target.presenter !== this.#grid) {
+         target.presenter = this.#grid;
+      }
    }
 
    /**
