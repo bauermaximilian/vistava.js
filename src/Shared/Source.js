@@ -10,10 +10,12 @@ import { AbstractMemberNotImplementedError } from "../Errors/AbstractMemberNotIm
 /**
  * Defines a simple configuration object with properties that are used to control the behaviour
  * of the source instance. For the base {@link Source} class, this is just an empty object.
- * @typedef {object} SourceConfiguration
+ * @typedef {{}} SourceConfiguration
  */
 
 /**
+ * Provides the base class from which all content sources for the application are derived from.
+ * Also see {@link SourceSegmented} for a derived abstract class with functionality for pagination.
  * @abstract Must override {@link createCollectionRetriever} and provide a constructor that matches
  * the signature of {@link SourceConstructor}.
  */
