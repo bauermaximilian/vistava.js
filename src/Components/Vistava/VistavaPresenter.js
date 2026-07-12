@@ -132,6 +132,7 @@ export class VistavaPresenter {
       this.#grid.unsetReferenceLayout();
       this.#grid.reset(undefined, this.#grid.layout.size, undefined);
       this.#model.reset(true);
+      this.#startIndex = 0;
       this.#onStateUpdated.trigger({ newIndex: 0, newQuery: "", newView: this.layoutTypes.defaultLayoutType.identifier });
 
       this.#subscribeEvents();
