@@ -12,9 +12,13 @@ import { MediaTypes } from "../../../Shared/MediaTypes.js";
  * @property {string?} [mediaPreviewType]
  * @property {string?} [thumbnailUrl]
  * @property {string?} [thumbnailType]
- * @property {string?} [iconName]
+ * @property {TileValueType?} [type]
  * @property {string?} [queryTarget]
  * @property {string?} [sourceUrl]
+ */
+
+/**
+ * @typedef {"Media"|"ChildCollection"|"ParentCollection"|"SiblingCollection"} TileValueType 
  */
 
 export class TileValue {
@@ -34,8 +38,8 @@ export class TileValue {
    #thumbnailUrl;
    /** @type {string?} */
    #thumbnailType;
-   /** @type {string?} */
-   #iconName;
+   /** @type {TileValueType?} */
+   #type;
    /** @type {string?} */
    #queryTarget;
    /** @type {string?} */
@@ -49,7 +53,7 @@ export class TileValue {
    get thumbnailType() { return this.#thumbnailType; }
    get mediaPreviewUrl() { return this.#mediaPreviewUrl; }
    get mediaPreviewType() { return this.#mediaPreviewType; }
-   get iconName() { return this.#iconName; }
+   get type() { return this.#type; }
    get queryTarget() { return this.#queryTarget; }
    get sourceUrl() { return this.#sourceUrl; }
 
@@ -94,8 +98,8 @@ export class TileValue {
       }
    }
 
-   get hasIconName() {
-      return typeof(this.#iconName) === "string" && this.#iconName.trim().length > 0;
+   get hasType() {
+      return typeof(this.#type) === "string" && this.#type.trim().length > 0;
    }
 
    get hasQueryTarget() {
@@ -118,7 +122,8 @@ export class TileValue {
       this.#mediaPreviewType = TileValue.#getStringOrNull(initializer?.mediaPreviewType);
       this.#thumbnailUrl = TileValue.#getStringOrNull(initializer?.thumbnailUrl);
       this.#thumbnailType = TileValue.#getStringOrNull(initializer?.thumbnailType);
-      this.#iconName = TileValue.#getStringOrNull(initializer?.iconName);
+      //@ts-ignore
+      this.#type = TileValue.#getStringOrNull(initializer?.type);
       this.#queryTarget = TileValue.#getStringOrNull(initializer?.queryTarget);
       this.#sourceUrl = TileValue.#getStringOrNull(initializer?.sourceUrl);
    }
