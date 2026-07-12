@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { InputEventsGroup } from "../Shared/UserInput/InputEventsGroup.js";
-import { cu, e } from "../../Utils/BrowserUtils.js";
+import { cu } from "../../Utils/BrowserUtils.js";
 import { RU } from "../../Utils/RectangleUtils.js";
 import { VU } from "../../Utils/VectorUtils.js";
 import { ContextMenuPresenter } from "./ContextMenuPresenter.js";
@@ -146,11 +146,10 @@ export class ContextMenuView extends InteractivePresenterView {
 
       if (this.presenter != null) {
          for (let menuEntryPresenter of this.presenter.entries) {
-            let menuEntryView = e(ContextMenuEntryView, (e, s) => {
+            let menuEntryView = cu(null, ContextMenuEntryView, this.#menuElement, (e, s) => {
                e.presenter = menuEntryPresenter;
             });
             this.#menuEntries.set(menuEntryPresenter.model, menuEntryView);
-            this.#menuElement.appendChild(menuEntryView);
          }
       }
 

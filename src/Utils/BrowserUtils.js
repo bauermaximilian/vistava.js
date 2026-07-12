@@ -147,101 +147,41 @@ export class BrowserUtils {
 	}
 
 	/**
-	 * Creates a new instance of a (registered) custom element for the current document.
-	 * See the other overloads for instantiating common element instances.
-	 * @template {HTMLElement} TClass The type of the custom element. 
-	 * Must be defined before using {@link window.customElements.define}. 
-	 * "Standard" element types (like {@link HTMLDivElement}) are not supported by this overload.
-	 * @overload
-	 * @param {ClassType<TClass>} elementType The class type (constructor) of the custom element. 
-	 * Must be defined before using {@link window.customElements.define}. 
-	 * "Standard" element types (like {@link HTMLDivElement}) are not supported by this overload.
-	 * @param {((element:TClass, elementStyle:CSSStyleDeclaration)=>any)|null} [initializer] 
-	 * A function which will be called once the new element was created and populated with all specified 
-	 * {@link children}, before returning it. Optional.
-	 * @param {...Array<(string|Element)>} children Any child elements that should be appended to the newly created 
-	 * element, or strings that should be appended to the inner text of the element. Optional.
-	 * @returns {TClass} A new HTMLElement instance of the specified {@link TClass} type.
-	 * @throws {ArgumentError} Is thrown when the specified {@link TCLass} is no valid registered 
-	 */
-	/**
-	 * Creates a new instance of a common element for the current document.
-	 * See the other overloads for instantiating custom element instances.
-	 * @template {keyof HTMLElementTagNameMap} TTag The name of the common element.
-	 * @overload
-	 * @param {TTag} elementType The name of the common element.
-	 * @param {((element:HTMLElementTagNameMap[TTag], elementStyle:CSSStyleDeclaration)=>any)|null} [initializer] 
-	 * A function which will be called once the new element was created and populated with all specified 
-	 * {@link children}, before returning it. Optional.
-	 * @param {...Array<(string|Element)>} children Any child elements that should be appended to the newly created 
-	 * element, or strings that should be appended to the inner text of the element. Optional.
-	 * @returns {HTMLElementTagNameMap[TTag]} A new HTMLElement instance of the specified {@link TTag} type.
-	 */
-	/**
-	 * Creates a new instance of a common or (registered) custom element for the current document.
-	 * @overload
-	 * @param {string} elementType The name of the common or (registered) custom element.
-	 * @param {((element:HTMLElement, elementStyle:CSSStyleDeclaration)=>any)|null} [initializer] 
-	 * A function which will be called once the new element was created and populated with all specified 
-	 * {@link children}, before returning it. Optional.
-	 * @param {...Array<(string|Element)>} children Any child elements that should be appended to the newly created 
-	 * element, or strings that should be appended to the inner text of the element. Optional.
-	 * @returns {HTMLElement} A new HTMLElement instance.
-	 */
-	static createElement(elementType, initializer, ...children) {
-		let elementTagName = null;
-		if (typeof (elementType) === "string") {
-			elementTagName = elementType;
-		} else if (typeof (elementType) === "function" && elementType.prototype instanceof HTMLElement) {
-			elementTagName = customElements.getName(elementType);
-			if (elementTagName === null && "tagName" in elementType && typeof(elementType.tagName) === "string") {
-				elementTagName = elementType.tagName;
-				customElements.define(elementTagName, elementType);
-			}
-		}
-		if (elementTagName == null) {
-			throw new ArgumentError("The specified element type was neither a valid HTML tag name nor a " +
-				"custom HTMLElement class with a static 'tagName' property.");
-		}
-
-		/** @type {HTMLElement|TClass|HTMLElementTagNameMap[TTag]} */
-		let element = document.createElement(elementTagName);
-
-		if (children != null) {
-			for (let childElement of children) {
-				if (childElement instanceof Element) {
-					element.appendChild(childElement);
-				} else {
-					element.innerText += childElement?.toString() ?? "";
-				}
-			}
-		}
-
-		initializer?.(element, element.style);
-
-		return element;
-	}
-
-	/**
-	 * @template {HTMLElement} T
-	 * @template {HTMLElement} TRequired
-	 * @param {T?} currentElementValue 
-	 * @param {ClassType<TRequired>|HTMLElementType<TRequired>} elementType 
-	 * @param {Element|ShadowRoot|null} parentElement
+	 * Creates and/or updates a HTML element.
+	 * @template {HTMLElement} T The current (actual) type of the HTMLElement to be updated.
+	 * @template {HTMLElement} TRequired The desired type of HTMLElement to be created or updated.
+	 * @param {T?} currentElementValue The current value of the HTML element (or null).
+	 * @param {ClassType<TRequired>|HTMLElementType<TRequired>} elementType The class type of HTMLElement
+	 * (e.g. {@link HTMLDivElement}) to create and/or update.
+	 * @param {Element|ShadowRoot|null} parentElement The parent element, into which the element created
+	 * or updated with this method should be appended (or prepended) to.
 	 * @param {((element:TRequired, elementStyle:CSSStyleDeclaration)=>void)?} [initializer=null]
 	 * Initializes the element before inserting it into the DOM. Only executed when the element doesn't exist yet.
 	 * @param {((element:TRequired, elementStyle:CSSStyleDeclaration)=>void)?} [updater=null]
 	 * Updates the element (while already inside the DOM). Always executed, if provided.
-	 * @param {((previousRemovedElement:T)=>void)?} [destructor=null] 
-	 * @param {boolean} [prependOnCreate=false] 
-	 * @returns {TRequired}
+	 * @param {((previousRemovedElement:T)=>void)?} [destructor=null] Performs any destructor logic
+	 * on {@link currentElementValue} if it is not of type {@link TRequired} before getting removed from the DOM
+	 * and replaced by the new element value.
+	 * @param {boolean} [prependOnCreate=false] true to prepend any newly created element to the specified 
+	 * {@link parentElement}, false to append it to the {@link parentElement} instead (default).
+	 * @returns {TRequired} The created/updated element value.
 	 */
 	static createOrUpdateElement(currentElementValue, elementType, parentElement, initializer = null,
 		updater = null, destructor = null, prependOnCreate = false) {
 		let elementTypeProperties = BrowserUtils.#getDefinedElementProperties(elementType);
 		
 		if (currentElementValue instanceof elementTypeProperties.elementConstructor) {
-			//TODO: Ensure the parentElement matches with the currentElementValue.parentElement, adjust if necessary
+			if (parentElement != null && currentElementValue.parentNode !== parentElement) {
+				if (currentElementValue.parentElement != null) {
+					currentElementValue.parentElement.removeChild(currentElementValue);
+				}
+				if (prependOnCreate) {
+					parentElement.prepend(currentElementValue);
+				} else {
+					parentElement.append(currentElementValue);
+				}
+			}
+
 			updater?.(currentElementValue, currentElementValue.style);
 			return currentElementValue;
 		} else {
@@ -266,6 +206,71 @@ export class BrowserUtils {
 			}
 
 			updater?.(newElement, newElement.style);
+			
+			return newElement;
+		}
+	}
+
+	/**
+	 * Creates and/or updates a HTML element asynchronously.
+	 * @template {HTMLElement} T The current (actual) type of the HTMLElement to be updated.
+	 * @template {HTMLElement} TRequired The desired type of HTMLElement to be created or updated.
+	 * @param {T?} currentElementValue The current value of the HTML element (or null).
+	 * @param {ClassType<TRequired>|HTMLElementType<TRequired>} elementType The class type of HTMLElement
+	 * (e.g. {@link HTMLDivElement}) to create and/or update.
+	 * @param {Element|ShadowRoot|null} parentElement The parent element, into which the element created
+	 * or updated with this method should be appended (or prepended) to.
+	 * @param {((element:TRequired, elementStyle:CSSStyleDeclaration)=>Promise<void>)?} [initializer=null]
+	 * Initializes the element before inserting it into the DOM. Only executed when the element doesn't exist yet.
+	 * @param {((element:TRequired, elementStyle:CSSStyleDeclaration)=>Promise<void>)?} [updater=null]
+	 * Updates the element (while already inside the DOM). Always executed, if provided.
+	 * @param {((previousRemovedElement:T)=>Promise<void>)?} [destructor=null] Performs any destructor logic
+	 * on {@link currentElementValue} if it is not of type {@link TRequired} before getting removed from the DOM
+	 * and replaced by the new element value.
+	 * @param {boolean} [prependOnCreate=false] true to prepend any newly created element to the specified 
+	 * {@link parentElement}, false to append it to the {@link parentElement} instead (default).
+	 * @returns {Promise<TRequired>} The created/updated element as an awaitable {@link Promise}.
+	 */
+	static async createOrUpdateElementAsync(currentElementValue, elementType, parentElement, initializer = null,
+		updater = null, destructor = null, prependOnCreate = false) {
+		let elementTypeProperties = BrowserUtils.#getDefinedElementProperties(elementType);
+		
+		if (currentElementValue instanceof elementTypeProperties.elementConstructor) {
+			if (parentElement != null && currentElementValue.parentNode !== parentElement) {
+				if (currentElementValue.parentElement != null) {
+					currentElementValue.parentElement.removeChild(currentElementValue);
+				}
+				if (prependOnCreate) {
+					parentElement.prepend(currentElementValue);
+				} else {
+					parentElement.append(currentElementValue);
+				}
+			}
+
+			await BrowserUtils.#tryAwait(updater?.(currentElementValue, currentElementValue.style));
+			return currentElementValue;
+		} else {
+			let newElement = document.createElement(elementTypeProperties.tagName);
+			if (newElement instanceof elementTypeProperties.elementConstructor) {
+				await BrowserUtils.#tryAwait(initializer?.(newElement, newElement.style));
+			} else {
+				throw new ImplementationError("The created element does not match with the expected type.");
+			}
+
+			if (parentElement !== null) {
+				currentElementValue?.remove();
+				if (prependOnCreate) {
+					parentElement.prepend(newElement);
+				} else {
+					parentElement.append(newElement);
+				}
+			}
+			
+			if (currentElementValue != null) {
+				await BrowserUtils.#tryAwait(destructor?.(currentElementValue));
+			}
+
+			await BrowserUtils.#tryAwait(updater?.(newElement, newElement.style));
 			
 			return newElement;
 		}
@@ -544,15 +549,19 @@ export class BrowserUtils {
 
 		return cachedProperties;
 	}
+
+	/**
+	 * @param {Promise<void>|null|undefined} returnValue 
+	 * @returns {Promise<void>}
+	 */
+	static async #tryAwait(returnValue) {
+		if (returnValue instanceof Promise) {
+			await returnValue;
+		}
+	}
 }
 
-/**
- * Creates a new instance of a common or (registered) custom element for the current document.
- * This is an alias for the {@link BrowserUtils.createElement} method.
- */
-export const e = BrowserUtils.createElement;
-
-export const c = BrowserUtils.createElement;
 export const cu = BrowserUtils.createOrUpdateElement;
+export const cua = BrowserUtils.createOrUpdateElementAsync;
 
 export { BrowserUtils as BU }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { c, cu } from "../../Utils/BrowserUtils.js";
+import { cu } from "../../Utils/BrowserUtils.js";
 import { PresenterView } from "../Shared/PresenterView.js";
 import { GuiIconPresenter } from "../GuiIcon/GuiIconPresenter.js";
 import { GuiIconView } from "../GuiIcon/GuiIconView.js";
@@ -30,12 +30,12 @@ export class ContextMenuEntryView extends PresenterView {
    constructor() {
       super(ContextMenuEntryPresenter);
 
-      this.root.appendChild(this.#element = c("li", (e, s) => {
+      this.#element = cu(null, HTMLLIElement, this.root, (e, s) => {
          s.userSelect = "none";
          s.display = "flex";
          s.fontSize = "18px";
          s.borderBottom = "1px solid #181818";
-      }));
+      });
 
       this.onPresenterChanged.subscribe(this.#handleOnPresenterChanged);
    }
