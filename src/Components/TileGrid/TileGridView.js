@@ -238,6 +238,18 @@ export class TileGridView extends InteractivePresenterView {
       return false;
    }
 
+   /**
+    * @param {import("../../Utils/VectorUtils.js").Vector} position 
+    * @returns {boolean}
+    */
+   isWithinBounds(position) {
+      if (this.#bounds != null) {
+         return RU.contains(this.#bounds, position);
+      } else {
+         return false;
+      }
+   }
+
    #enableTileUpdateAnimation() {
       if (!this.#tileUpdateAnimationEnabled) {
          this.#tileUpdateAnimationEnabled = true;

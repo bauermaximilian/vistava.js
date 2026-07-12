@@ -75,7 +75,7 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    #handleOnClick = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
 
-      if (args.noFurtherAction) { return; }
+      if (args.noFurtherAction || !this.tileGridView.isWithinBounds(args.position)) { return; }
 
       let focussedTileIndex = this.#updateFocusToPosition(args.position);
       if (focussedTileIndex !== null) {
@@ -88,7 +88,7 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    #handleOnClickSecondary = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
 
-      if (args.noFurtherAction) { return; }
+      if (args.noFurtherAction || !this.tileGridView.isWithinBounds(args.position)) { return; }
 
       this.#updateFocusToPosition(args.position);
 
