@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { TileValue } from "../Components/TileGrid/Shared/TileValue.js";
 import { AbstractMemberNotImplementedError } from "../Errors/AbstractMemberNotImplementedError.js";
 
 /** 
@@ -39,5 +40,25 @@ export class Source {
    /** @abstract @type {CollectionRetrieverConstructor<object>} */
    createCollectionRetriever(query) {
       throw new AbstractMemberNotImplementedError();
+   }
+
+   /**
+    * An utility method that creates a new {@link CollectionRetriever<TileValue>} from an array.
+    * @param {TileValue[]} sourceArray 
+    * @returns CollectionRetriever<TileValue>
+    */
+   static createArrayCollectionRetriever(sourceArray) {
+      return (/** @type {number} */ offset, /** @type {number} */ count) => {
+         let target = [];
+         for (let i = 0; i < count; i++) {
+            let iSource = offset + i;
+            if (iSource < sourceArray.length && iSource >= 0) {
+               target.push(sourceArray[iSource]);
+            } else {
+               break;
+            }
+         }
+         return Promise.resolve(target);
+      }
    }
 }
