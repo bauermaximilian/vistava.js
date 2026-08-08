@@ -155,7 +155,7 @@ export class GalleryTileView extends TileView {
       } else if (mediaType.startsWith("video") && !this.#loadingFailed) {
          const mediaPreviewType = this.presenter?.model.getDataAsString(TileDataField.mediaPreviewType) ?? null;
          const mediaPreviewUrl = (mediaPreviewType?.startsWith("image") === true) ?
-            (this.presenter?.model.getDataAsString(TileDataField.mediaUrl) ?? null) : null;
+            (this.presenter?.model.getDataAsString(TileDataField.mediaPreviewUrl) ?? null) : null;
 
          this.#mediaElement = cu(this.#mediaElement, HTMLVideoElement, this.#containerElement, (e, s) => {
             e.addEventListener("loadedmetadata", this.#handleOnContentLoadingSucceeded, { once: true });
