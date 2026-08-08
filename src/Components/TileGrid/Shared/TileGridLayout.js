@@ -877,15 +877,58 @@ export class TileGridLayout extends TileGridLayoutBase {
 	countColumnTilesOutOfBounds(/** @type {boolean} */ fromEnd = false) {
 		if (this.#indexMinimum !== null && this.#indexMaximum !== null) {
 			let column = this.#columnsByTileIndex.get(fromEnd ? this.#indexMaximum : this.#indexMinimum);
+			if (column != null) {
+				return this.#countColumnTilesOutOfBounds(column, fromEnd);
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	countColumnTilesOutOfBoundsMinimum(/** @type {boolean} */ fromEnd = false) {
+		let tileCount = Number.MAX_SAFE_INTEGER;
+		for (let column of this.#columns) {
+			let columnTileCount = this.#countColumnTilesOutOfBounds(column, fromEnd);
+			tileCount = Math.min(tileCount, columnTileCount);
+		}
+		if (tileCount === Number.MAX_SAFE_INTEGER) {
+			return 0;
+		} else {
+			return tileCount;
+		}
+	}
+
+	countColumnTilesOutOfBoundsMaximum(/** @type {boolean} */ fromEnd = false) {
+		let tileCount = Number.MIN_SAFE_INTEGER;
+		for (let column of this.#columns) {
+			let columnTileCount = this.#countColumnTilesOutOfBounds(column, fromEnd);
+			tileCount = Math.max(tileCount, columnTileCount);
+		}
+		if (tileCount === Number.MIN_SAFE_INTEGER) {
+			return 0;
+		} else {
+			return tileCount;
+		}
+	}
+
+	/**
+	 * 
+	 * @param {TileGridLayoutColumn} column 
+	 * @param {boolean} fromEnd
+	 * @returns 
+	 */
+	#countColumnTilesOutOfBounds(column, fromEnd) {
+		if (this.#indexMinimum !== null && this.#indexMaximum !== null) {
 			if (fromEnd) {
-				return column?.countWhile(item => TileFlowType.calculateScalar(item.x, item.y,
+				return column.countWhile(item => TileFlowType.calculateScalar(item.x, item.y,
 					this.#tileFlow) > this.#containerLength, true) ?? 0;
 			} else {
-				return column?.countWhile(item => (
+				return column.countWhile(item => (
 					TileFlowType.calculateScalar(item.x, item.y, this.#tileFlow) +
 					TileFlowType.calculateScalar(item.width, item.height, this.#tileFlow) < 0)) ?? 0;
 			}
-			
 		} else {
 			return 0;
 		}

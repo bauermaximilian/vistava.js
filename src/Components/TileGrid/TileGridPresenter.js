@@ -177,8 +177,8 @@ export class TileGridPresenter {
 			/** @type {number?} */
 			let tileIndexToRemove = null;
 
-			let columnOverflowStart = this.#layout.countColumnTilesOutOfBounds();
-			let columnOverflowEnd = this.#layout.countColumnTilesOutOfBounds(true);
+			let columnOverflowStart = this.#layout.countColumnTilesOutOfBoundsMinimum();
+			let columnOverflowEnd = this.#layout.countColumnTilesOutOfBoundsMinimum(true);
 
 			let overflowStartExceeded = columnOverflowStart > this.#layout.type.columnOverflowMaximum;
 			let overflowEndExceeded = columnOverflowEnd > this.#layout.type.columnOverflowMaximum;
