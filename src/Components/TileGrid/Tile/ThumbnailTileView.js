@@ -76,7 +76,6 @@ export class ThumbnailTileView extends TileView {
 
       let hasFocus = this.presenter.focus !== TileFocuses.none;
       let hasVisibleFocus = this.presenter.focus === TileFocuses.visible;
-      let transitionTime = this.presenter.focus === TileFocuses.visible ? "0s" : "0.125s";   
       
       let thumbnailType = this.presenter?.model.getDataAsString(TileDataField.thumbnailType) ?? null;
       let thumbnailUrl = this.presenter?.model.getDataAsString(TileDataField.thumbnailUrl) ?? null;
@@ -90,7 +89,6 @@ export class ThumbnailTileView extends TileView {
          s.borderRadius = "16px";
          s.boxSizing = "border-box";
          s.display = "block";
-         s.transition = `filter ${transitionTime} ease-in, color ${transitionTime} ease-in`;
       };
       /** @param {CSSStyleDeclaration} s @param {number} visibleFocusOpacity @param {number} invisibleFocusOpacity */
       let updateSharedStyles = (s, visibleFocusOpacity, invisibleFocusOpacity) => {
@@ -165,7 +163,9 @@ export class ThumbnailTileView extends TileView {
                e.presenter = this.#overlayIconPresenter ??= new GuiIconPresenter();
                e.presenter.model.icon = "play";
                s.width = "20px";
-               s.height = "20px";               
+               s.height = "20px";    
+               s.filter = "drop-shadow(0px 0px 0.6px black) drop-shadow(0px 0px 0.5px black) " +
+                  "drop-shadow(0px 0px 0.5px black)";
             });
 
             s.color = "#d8d8d8";

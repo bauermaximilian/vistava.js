@@ -652,13 +652,13 @@ class TileGridViewMovementController {
       this.#orthogonalPullInputOffsetAgent = this.#agents.add(
          c => new AgentArrival({ speed: 250, maximumVelocity: 2500 }, c));
       this.#focussedTileOffsetAgent = this.#agents.add(
-         c => new AgentArrival({ friction: 30, speed: 500, maximumVelocity: 5000 }, c));
+         c => new AgentArrival({ friction: 40, speed: 1000, maximumVelocity: 10000 }, c));
       this.#positionGuardAgent = this.#agents.add(
          c => new AgentArrival({ friction: 30, speed: 500, maximumVelocity: 2500 }, c));
       this.#movementInputOffsetMomentumAgent = this.#agents.add(
-         c => new AgentArrivalMomentum({ maximumVelocity: 3500 }, c));
+         c => new AgentArrivalMomentum({ maximumVelocity: 5000 }, c));
       this.#scrollInputOffsetMomentumAgent = this.#agents.add(
-         c => new AgentArrivalMomentum({ maximumVelocity: 2000 }, c));
+         c => new AgentArrivalMomentum({ maximumVelocity: 4000, friction: 15, speed: 150 }, c));
       this.#movementAsScrollInputOffsetMomentumAgent = this.#agents.add(
          c => new AgentArrivalMomentum({ maximumVelocity: 2000 }, c));
       this.#agents.onIdleStateChanged.subscribe(this.#handleOnAgentsIdleStateChanged);
@@ -757,9 +757,9 @@ class TileGridViewMovementController {
       }
 
       let offsetUser = this.#movementInputOffsetAgent.lastStep +
-      this.#scrollInputOffsetAgent.lastStep * positionGuardOverrideRatio +
-      this.#movementInputOffsetMomentumAgent.lastStep +
-      this.#scrollInputOffsetMomentumAgent.lastStep;
+         this.#scrollInputOffsetAgent.lastStep * positionGuardOverrideRatio +
+         this.#movementInputOffsetMomentumAgent.lastStep +
+         this.#scrollInputOffsetMomentumAgent.lastStep;
       let offsetInternal = this.#positionGuardAgent.lastStep +
       this.#focussedTileOffsetAgent.lastStep;
       
