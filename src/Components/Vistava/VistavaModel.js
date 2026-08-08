@@ -3,7 +3,6 @@
 import { Assert } from "../../Shared/Assert.js";
 import { CachedCollection } from "../../Shared/CachedCollection.js";
 import { ArgumentError } from "../../Errors/ArgumentError.js";
-import { ImplementationError } from "../../Errors/ImplementationError.js";
 import { EventController } from "../../Shared/Event.js";
 import { TileModel } from "../TileGrid/Tile/TileModel.js";
 import { TileGridModel } from "../TileGrid/TileGridModel.js";
@@ -60,15 +59,18 @@ export class VistavaModel {
     */
    async addAsync(index) {
       let targetModel = this.#gridModel;
+      let targetModelTileCount = this.#gridModel.count;
       let currentCollection = this.#collection;
       let data = await currentCollection.getAsync(index);
       // If the current collection changed while retrieving the tile data (e.g. query change),
       // do not add the tile from the old source to the model with the new source and just return false.
       if (data !== null && currentCollection === this.#collection) {
-         targetModel.add(new TileModel(index, data));
-         if (targetModel !== this.#gridModel) {
-            throw new ImplementationError("It has happened...");
+         // Do not add the retrieved model value if the grid was cleared or otherwise modified 
+         // in the meantime to avoid undefined behaviour.
+         if (targetModel !== this.#gridModel || this.#gridModel.count !== targetModelTileCount) {
+            return false;
          }
+         targetModel.add(new TileModel(index, data));
          return true;
       } else {
          return false;
