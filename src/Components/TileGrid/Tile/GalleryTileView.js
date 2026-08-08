@@ -148,6 +148,7 @@ export class GalleryTileView extends TileView {
             s.setProperty("-webkit-user-select", "none");
             s.userSelect = "none";
             s.objectFit = "none";
+            s.opacity = "0";
          }, (e, s) => {
             s.transform = transform;
          });
@@ -234,6 +235,7 @@ export class GalleryTileView extends TileView {
       let mediaBounds;
       if (mediaElement instanceof HTMLImageElement) {
          mediaBounds = VU.new(mediaElement.naturalWidth, mediaElement.naturalHeight);
+         mediaElement.style.opacity = "1";
       } else if (mediaElement instanceof HTMLVideoElement) {
          mediaBounds = VU.new(mediaElement.videoWidth, mediaElement.videoHeight);
       } else {
