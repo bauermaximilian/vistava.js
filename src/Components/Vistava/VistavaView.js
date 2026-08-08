@@ -81,6 +81,8 @@ export class VistavaView extends PresenterView {
    #shouldRunTrimOrExtendPromise = false;
    /** @type {TargetElementDetacher?} */
    #inputManagerDetacher = null;
+   /** @type {number} */
+   #lastGridModifiedTimestamp = 0;
 
    constructor() {
       super(VistavaPresenter, true);
@@ -126,15 +128,21 @@ export class VistavaView extends PresenterView {
    }
 
    async #runTrimAndExtendAsync() {
-      const cycleWaitGridModified = 5;
-      const cycleWaitGridUnmodified = 250;
+      const cycleWaitDefault = 10;
+      const cycleWaitSleep = 500;
+      const cycleSleepTreshold = 2000;
 
       while (this.#shouldRunTrimOrExtendPromise) {
          let gridModified = false;
          if (this.#gridView !== null && this.presenter !== null) {
             gridModified = await this.presenter?.trimOrExtendGridAsync();
          }
-         await AsyncUtils.sleep(gridModified ? cycleWaitGridModified : cycleWaitGridUnmodified);
+         if (gridModified) {
+            this.#lastGridModifiedTimestamp = performance.now();
+         }
+         let cycleWait = ((performance.now() - this.#lastGridModifiedTimestamp) < cycleSleepTreshold) ?
+            cycleWaitDefault : cycleWaitSleep;
+         await AsyncUtils.sleep(cycleWait);
       }
    }
 
