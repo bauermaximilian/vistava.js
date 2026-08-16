@@ -829,10 +829,10 @@ class GalleryTileViewMovementController {
    #handleOnAction = (args) => {
       if (this.#hasFocus && !args.noFurtherAction) {
          if (args.action === "zoomOut") {
-            this.#addZoomFactorToZoomInputAgent(1.25);
+            this.#addZoomFactorToZoomInputAgent(0.8);
             args.noFurtherAction = true;
          } else if (args.action === "zoomIn") {
-            this.#addZoomFactorToZoomInputAgent(0.75);
+            this.#addZoomFactorToZoomInputAgent(1.25);
             args.noFurtherAction = true;
          } else if (args.action === "zoom") {
             this.toggleNextScaleStep();
