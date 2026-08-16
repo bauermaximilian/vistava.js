@@ -7,6 +7,7 @@ import { EventController } from "../../Shared/Event.js";
 import { TileModel } from "../TileGrid/Tile/TileModel.js";
 import { TileGridModel } from "../TileGrid/TileGridModel.js";
 import { InvalidOperationError } from "../../Errors/InvalidOperationError.js";
+import { AsyncUtils } from "../../Utils/AsyncUtils.js";
 
 export class VistavaModel {
    get query() { return this.#query; }
@@ -38,6 +39,9 @@ export class VistavaModel {
    /** @type {string} */
    #query = "";
 
+   /** @type {string?} */
+   #lastCollectionErrorMessage = null;
+
    /**
     * 
     * @param {CollectionRetrieverConstructor<object>} collectionFactory
@@ -61,7 +65,24 @@ export class VistavaModel {
       let targetModel = this.#gridModel;
       let targetModelTileCount = this.#gridModel.count;
       let currentCollection = this.#collection;
-      let data = await currentCollection.getAsync(index);
+      
+      let data;
+      try {
+         data = await currentCollection.getAsync(index);
+         this.#lastCollectionErrorMessage = null;
+      } catch (error) {
+         // If unexpected issues with the collection retriever are encountered, log the error only once
+         // and force the caller to wait a bit to avoid rapid retries.
+         let errorMessage = error?.toString() ?? "Unknown error";
+         if (this.#lastCollectionErrorMessage !== errorMessage) {
+            this.#lastCollectionErrorMessage = errorMessage;
+            console.error(`The collection retriever failed unexpectedly: ${errorMessage}.\n` +
+               "Subsequent identical errors will not be logged until a successful request.");
+         }
+         await AsyncUtils.sleep(1000);
+         data = null;
+      }
+
       // If the current collection changed while retrieving the tile data (e.g. query change),
       // do not add the tile from the old source to the model with the new source and just return false.
       if (data !== null && currentCollection === this.#collection) {
