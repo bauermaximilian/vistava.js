@@ -1,0 +1,31 @@
+{
+   "movement": {
+      "speed": 350,
+      "speedupDuration": 0.5,
+      "speedupStart": 0.1,
+      "upKey": "ArrowUp",
+      "rightKey": "ArrowRight",
+      "downKey": "ArrowDown",
+      "leftKey": "ArrowLeft"
+   },
+   "actions": {
+      "ArrowUp": "up",
+      "ArrowRight": "right",
+      "ArrowDown": "down",
+      "ArrowLeft": "left",
+      "Shift": "zoom",
+      "Enter": "confirm",
+      "Escape": "cancel",
+      "Backspace": "back",
+      " ": "play",
+      "+": "zoomIn",
+      ",": "zoomIn",
+      ".": "zoomOut",
+      "-": "zoomOut",
+      "f": "fullscreen",
+      "x": "fullscreen",
+      "r": "reset",
+      "m": "toggleMute",
+      "ContextMenu": "contextMenu"
+   }
+}

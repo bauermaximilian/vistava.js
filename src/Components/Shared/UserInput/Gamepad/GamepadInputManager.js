@@ -8,6 +8,7 @@ import { GamepadProfile } from "./GamepadProfile.js";
 import { VectorUtils as V } from "../../../../Utils/VectorUtils.js";
 import { GamepadInputManagerSettings } from "./GamepadInputManagerSettings.js";
 import { AU } from "../../../../Utils/ArrayUtils.js";
+import defaultConfiguration from "../Configurations/gamepad.json" with { type: "json" };
 
 export class GamepadInputManager {
    /** 
@@ -29,7 +30,7 @@ export class GamepadInputManager {
    #newGamepadPollingInterval = 1000;
 
    /** @type {GamepadInputManagerSettings} */
-   #settings = new GamepadInputManagerSettings();
+   #settings = GamepadInputManagerSettings.fromConfiguration(defaultConfiguration);
 
    /** @type {HTMLElement?} */
    #targetElement = null;
@@ -118,8 +119,7 @@ export class GamepadInputManager {
             if (gamepad !== null) {
                let gamepadId = gamepad.id;
                let profile = AU.findLastOrNull(this.settings.profiles,
-                  p => p.identifierRegExp.test(gamepadId)) ??
-                  (this.settings.profiles.length > 0 ? this.settings.profiles[0] : null);
+                  p => p.identifierRegExp.test(gamepadId)); 
                /** @type {GamepadState} */
                let gamepadState = {
                   axes: [...gamepad.axes],

@@ -4,101 +4,8 @@ import { Assert } from "../../../Shared/Assert.js";
 import { InvalidOperationError } from "../../../Errors/InvalidOperationError.js";
 import { EventController } from "../../../Shared/Event.js";
 import { VectorUtils as V } from "../../../Utils/VectorUtils.js";
-
-export class KeyboardInputManagerSettings {
-   /** @type {number} */
-   #movementSpeed = 350;
-   /** @type {number} */
-   #movementSpeedupDuration = 0.5;
-   /** @type {number} */
-   #movementSpeedupStart = 0.1;
-   /** @type {string} */
-   #moveUpKey = "ArrowUp";
-   /** @type {string} */
-   #moveRightKey = "ArrowRight";
-   /** @type {string} */
-   #moveDownKey = "ArrowDown";
-   /** @type {string} */
-   #moveLeftKey = "ArrowLeft";
-   /** @type {Map<string, string>} */
-   #keyActions = new Map();
-   
-   /** @typedef {import("../../../Utils/VectorUtils.js").Vector} Vector */
-   /** @typedef {import("./InputManager.js").TargetElementDetacher} TargetElementDetacher */
-
-   get movementSpeed() { return this.#movementSpeed; }
-   set movementSpeed(value) {
-      Assert.numberPositive(value, "value");
-      this.#movementSpeed = value;
-   }
-
-   get movementSpeedupDuration() { return this.#movementSpeedupDuration; }
-   set movementSpeedupDuration(value) {
-      Assert.numberPositiveOrZero(value, "value");
-      this.#movementSpeedupDuration = value;
-   }
-
-   get movementSpeedupStart() { return this.#movementSpeedupStart; }
-   set movementSpeedupStart(value) {
-      Assert.numberPositiveOrZero(value, "value");
-      this.#movementSpeedupStart = value;
-   }
-
-   get moveUpKey() { return this.#moveUpKey; }
-   set moveUpKey(value) {
-      Assert.string(value, "value");
-      this.#moveUpKey = value;
-   }
-
-   get moveRightKey() { return this.#moveRightKey; }
-   set moveRightKey(value) {
-      Assert.string(value, "value");
-      this.#moveRightKey = value;
-   }
-
-   get moveDownKey() { return this.#moveDownKey; }
-   set moveDownKey(value) {
-      Assert.string(value, "value");
-      this.#moveDownKey = value;
-   }
-
-   get moveLeftKey() { return this.#moveLeftKey; }
-   set moveLeftKey(value) {
-      Assert.string(value, "value");
-      this.#moveLeftKey = value;
-   }
-
-   get keyActions() { return this.#keyActions; }
-   set keyActions(value) {
-      Assert.class(value, Map, "value");
-      this.#keyActions = value;
-   }
-
-   constructor() {
-      //TODO: Improve configurability of input managers and move these definitions where they belong
-      this.#keyActions.set("ArrowRight", "right");
-      this.#keyActions.set("ArrowLeft", "left");
-      this.#keyActions.set("ArrowUp", "up");
-      this.#keyActions.set("ArrowDown", "down");
-      this.#keyActions.set("Shift+ArrowUp", "volumeUp");
-      this.#keyActions.set("Shift+ArrowDown", "volumeDown");
-      this.#keyActions.set("Shift+ArrowRight", "rightAlt");
-      this.#keyActions.set("Shift+ArrowLeft", "leftAlt");
-      this.#keyActions.set("Shift", "zoom");
-      this.#keyActions.set("Enter", "confirm");
-      this.#keyActions.set("Escape", "cancel");
-      this.#keyActions.set("Backspace", "back");
-      this.#keyActions.set(" ", "play");
-      this.#keyActions.set("+", "zoomIn");
-      this.#keyActions.set(",", "zoomIn");
-      this.#keyActions.set(".", "zoomOut");
-      this.#keyActions.set("-", "zoomOut");
-      this.#keyActions.set("f", "fullscreen");
-      this.#keyActions.set("r", "reset");
-      this.#keyActions.set("m", "toggleMute");
-      this.#keyActions.set("ContextMenu", "contextMenu");
-   }
-}
+import { KeyboardInputManagerSettings } from "./KeyboardInputManagerSettings.js";
+import defaultConfiguration from "./Configurations/keyboard.json" with { type: "json" };
 
 export class KeyboardInputManager {
    /** @readonly @type {number} */
@@ -125,7 +32,7 @@ export class KeyboardInputManager {
    #startedKeyActions = new Map();
 
    /** @type {KeyboardInputManagerSettings} */
-   #settings = new KeyboardInputManagerSettings();
+   #settings = KeyboardInputManagerSettings.fromConfiguration(defaultConfiguration);
 
    /** @type {EventController<{sender:KeyboardInputManager, initialOffset:Vector}>} */
    #onMoveStart = new EventController();
@@ -135,6 +42,9 @@ export class KeyboardInputManager {
    #onMoveEnd = new EventController();
    /** @type {EventController<{sender:KeyboardInputManager, action:string}>} */
    #onKeyAction = new EventController();
+
+   /** @typedef {import("../../../Utils/VectorUtils.js").Vector} Vector */
+   /** @typedef {import("./InputManager.js").TargetElementDetacher} TargetElementDetacher */
 
    get #arrowKeyDown() { 
       return this.#moveLeftDown || this.#moveRightDown || 

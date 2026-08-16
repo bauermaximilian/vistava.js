@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { ParserError } from "../../../../Errors/ParserError.js";
 import { Assert } from "../../../../Shared/Assert.js";
+import { PU } from "../../../../Utils/ParseUtils.js";
 
 export class GamepadProfile {
    /** @type {Map<string, string>} */
@@ -17,6 +19,8 @@ export class GamepadProfile {
    #invertVertical = false;
    /** @type {boolean} */
    #invertHorizontal = false;
+   /** @type {boolean} */
+   #invertScroll = false;
    /** @type {number} */
    #axisActivationTreshold = 0.1;
    /** @type {number} */
@@ -56,6 +60,12 @@ export class GamepadProfile {
       this.#invertHorizontal = value;
    }
 
+   get invertScroll() { return this.#invertScroll; }
+   set invertScroll(value) {
+      Assert.boolean(value);
+      this.#invertScroll = value;
+   }
+
    get axisMoveVertical() { return this.#axisMoveVertical; }
    set axisMoveVertical(value) {
       if (value !== null) {
@@ -91,8 +101,59 @@ export class GamepadProfile {
     * @param {((profile:GamepadProfile)=>void)} [init]
     */
    constructor(identifierRegExp, init) {
-      //TODO: Improve configurability of input managers and move these definitions where they belong
       this.#identifierRegExp = identifierRegExp;
       init?.(this);
+   }
+
+   /**
+    * @param {string} key 
+    * @param {object} obj 
+    * @returns {GamepadProfile}
+    * @throws {ParserError}
+    */
+   static fromConfiguration(key, obj) {
+      let indentifierRegex;
+      try {
+         indentifierRegex = new RegExp(key, "i");
+      } catch (error) {
+         throw new ParserError(`The value "${key}" is no valid regex.`);
+      }
+
+      try {
+         let axisMovement = PU.parseObject(obj, "axisMovement", a => {
+            let usedAxisIds = new Set();
+            let parseAxisMovement = (/** @type {any} */ h) => {
+               let parsedAxis = {
+                  index: PU.parseNumber(h, "index"),
+                  invert: PU.parseBoolean(h, "invert", false),
+               };
+               if (usedAxisIds.has(parsedAxis.index)) {
+                  throw new ParserError(`The axis index "${parsedAxis.index}" was used more than once.`);
+               } else {
+                  usedAxisIds.add(parsedAxis.index);
+               }
+               return parsedAxis;
+            };
+            let horizontal = PU.parseObject(a, "horizontal", parseAxisMovement, null);
+            let vertical = PU.parseObject(a, "vertical", parseAxisMovement, null);
+            let scroll = PU.parseObject(a, "scroll", parseAxisMovement, null);
+            return { horizontal, vertical, scroll };
+         }, null);
+         let axisActions = PU.parseStringMap(obj, "axisActions", new Map());
+         let buttonActions = PU.parseStringMap(obj, "buttonActions", new Map());
+      
+         return new GamepadProfile(indentifierRegex, p => {
+            p.axisMoveHorizontal = axisMovement?.horizontal?.index ?? null;
+            p.invertHorizontal = axisMovement?.horizontal?.invert ?? false;
+            p.axisMoveVertical = axisMovement?.vertical?.index ?? null;
+            p.invertVertical = axisMovement?.vertical?.invert ?? false;
+            p.axisScroll = axisMovement?.scroll?.index ?? null;
+            p.invertScroll = axisMovement?.scroll?.invert ?? false;
+            p.axisActions = axisActions;
+            p.buttonActions = buttonActions;
+         });
+      } catch (error) {
+         throw new ParserError(`The segment "gamepads.${key}" couldn't be parsed: ${error}`);
+      }
    }
 }

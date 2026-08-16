@@ -387,6 +387,43 @@ export class BrowserUtils {
 	}
 
 	/**
+	 * @param {string} url 
+	 * @returns {Promise<string?>}
+	 */
+	static async tryFetchText(url) {
+		try {
+			let response = await fetch(url);
+			if (response.ok) {
+				return await response.text();
+			} else {
+				return null;
+			}
+		} catch {
+			return null;
+		}
+	}
+
+	/**
+	 * @param {string} url 
+	 * @param {(configObject:object)=>void} callback 
+	 * @returns {Promise<void>}
+	 */
+	static async tryLoadConfiguration(url, callback) {
+		let configText = await BrowserUtils.tryFetchText(url);
+		if (configText != null) {
+			try {
+				let configObject = JSON.parse(configText);
+				callback(configObject);
+				console.info(`Loaded user configuration from "${url}".`);
+			} catch (error) {
+				console.error(`User configuration from "${url}" couldn't be loaded. ${error}`);
+			}
+		} else {
+			console.info(`No user configuration found at "${url}" - using default configuration instead.`);
+		}
+	}
+
+	/**
 	 * @param {()=>void} handler 
 	 */
 	static subscribeToFullscreenChange(handler) {

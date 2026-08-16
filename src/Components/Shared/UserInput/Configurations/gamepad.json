@@ -1,0 +1,58 @@
+{
+   "scrollSpeed": 1,
+   "movementSpeed": 300,
+   "movementSpeedupFactor": 2,
+   "movementSpeedupTime": 3,
+   "gamepads": {
+      "(xbox|microsoft|standard)": {
+         "axisMovement": {
+            "horizontal": {
+               "index": 0,
+               "invert": true
+            },
+            "vertical": {
+               "index": 1,
+               "invert": true
+            },
+            "scroll": {
+               "index": 3,
+               "invert": false
+            }
+         },
+         "buttonActions": {
+            "0": "confirm",
+            "1": "back",
+            "2": "toggleMute",
+            "3": "zoom",
+            "4": "zoomOut",
+            "5": "zoomIn",
+            "9": "fullscreen",
+            "12": "up",
+            "13": "down",
+            "14": "left",
+            "15": "right"
+         }
+      },
+      "8BitDo Micro gamepad": {
+         "axisActions": {
+            "0-": "up",
+            "0": "down",
+            "1-": "right",
+            "1": "left"
+         },
+         "buttonActions": {
+            "0": "up",
+            "1": "right",
+            "3": "left",
+            "4": "down",
+            "6": "confirm",
+            "7": "confirm",
+            "8": "back",
+            "9": "back",
+            "10": "zoom",
+            "11": "zoom",
+            "12": "fullscreen"
+         }
+      }
+   }
+}
