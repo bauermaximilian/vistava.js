@@ -14,7 +14,7 @@ export class VideoController {
    /** @type {HTMLVideoElement?} */
    #videoElement = null;
    /** @type {boolean} */
-   static #initialIsMuted = true;
+   static #initialIsMuted = false;
    /** @type {boolean} */
    #initialPlaying = false;
    /** @type {number} */

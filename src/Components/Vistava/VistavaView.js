@@ -128,7 +128,7 @@ export class VistavaView extends PresenterView {
    }
 
    async #runTrimAndExtendAsync() {
-      const cycleWaitDefault = 10;
+      const cycleWaitDefault = 5;
       const cycleWaitSleep = 500;
       const cycleSleepTreshold = 2000;
 

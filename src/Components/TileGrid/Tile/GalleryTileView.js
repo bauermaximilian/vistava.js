@@ -36,6 +36,7 @@ export class GalleryTileView extends TileView {
    /** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").ScrollStartEventArgs} ScrollStartEventArgs */
    /** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").ScrollEventArgs} ScrollEventArgs */
    /** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").ScrollEndEventArgs} ScrollEndEventArgs */
+   /** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").ClickSecondaryEventArgs} ClickSecondaryEventArgs */
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").DoubleClickEventArgs} DoubleClickEventArgs */
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").MoveEventArgs} MoveEventArgs */
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").MoveEndEventArgs} MoveEndEventArgs */
@@ -439,6 +440,7 @@ class GalleryTileViewMovementController {
       this.#inputEvents.onMove.subscribe(this.#handleOnMove);
       this.#inputEvents.onMoveEnd.subscribe(this.#handleOnMoveEnd);
       this.#inputEvents.onDoubleClick.subscribe(this.#handleOnDoubleClick);
+      this.#inputEvents.onClickSecondary.subscribe(this.#handleOnClickSecondary);
       this.#inputEvents.onAction.subscribe(this.#handleOnAction);
 
       if (this.#contentSize !== null && this.#containerSize !== null) {
@@ -456,6 +458,7 @@ class GalleryTileViewMovementController {
          this.#inputEvents.onMove.unsubscribe(this.#handleOnMove);
          this.#inputEvents.onMoveEnd.unsubscribe(this.#handleOnMoveEnd);
          this.#inputEvents.onDoubleClick.unsubscribe(this.#handleOnDoubleClick);
+         this.#inputEvents.onClickSecondary.unsubscribe(this.#handleOnClickSecondary);
          this.#inputEvents.onAction.unsubscribe(this.#handleOnAction);
          this.#inputEvents = null;
       }
@@ -806,6 +809,17 @@ class GalleryTileViewMovementController {
 
    /** @type {EventHandler<DoubleClickEventArgs>} */
    #handleOnDoubleClick = (args) => {
+      if (this.#hasFocus && !args.noFurtherAction) {
+         if (args.inputDeviceType === InputDeviceTypes.mouse) {
+            BrowserUtils.toggleFullscreen();
+         } else {
+            this.toggleNextScaleStep();
+         }
+      }
+   };
+
+   /** @type {EventHandler<ClickSecondaryEventArgs>} */
+   #handleOnClickSecondary = (args) => {
       if (this.#hasFocus && !args.noFurtherAction) {
          this.toggleNextScaleStep();
       }
