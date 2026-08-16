@@ -282,13 +282,16 @@ export class GamepadInputManager {
       let currentScrollInput = this.#getAxisInput(currentAxes, profile.axisScroll);
       let previousScrollInput = this.#getAxisInput(previousAxes, profile.axisScroll);
 
-      if (previousScrollInput < profile.axisActivationTreshold &&
-         currentScrollInput >= profile.axisActivationTreshold) {
+      if (Math.abs(previousScrollInput) < profile.axisActivationTreshold &&
+         Math.abs(currentScrollInput) >= profile.axisActivationTreshold) {
          this.#onScrollStart.trigger({ sender: this, target: null });
-      } else if (previousScrollInput >= profile.axisActivationTreshold &&
-         currentScrollInput >= profile.axisActivationTreshold &&
+      } else if (Math.abs(previousScrollInput) >= profile.axisActivationTreshold &&
+         Math.abs(currentScrollInput) >= profile.axisActivationTreshold &&
          this.#targetElement && this.#onScroll.event.hasSubscribers) {
-         let scrollFactor = this.#settings.scrollSpeed * elapsedSeconds;
+         // Scaling out looks faster than scaling in with the same factor, so let's damp the scaling out a bit
+         let directionFactor = currentScrollInput > 0 ? 0.9 : -1;
+         let scrollFactor = Math.max(0.75, Math.min(1.25,
+            1 - (this.#settings.scrollSpeed * elapsedSeconds * directionFactor)));
          let bounds = this.#targetElement.getBoundingClientRect();
          let boundsCenter = V.new(
             bounds.left + bounds.width / 2,
@@ -301,8 +304,8 @@ export class GamepadInputManager {
             target: null,
             smoothingHint: true
          });
-      } else if (previousScrollInput >= profile.axisActivationTreshold &&
-         currentScrollInput < profile.axisActivationTreshold) {
+      } else if (Math.abs(previousScrollInput) >= profile.axisActivationTreshold &&
+         Math.abs(currentScrollInput) < profile.axisActivationTreshold) {
          this.#onScrollEnd.trigger({ sender: this });
       }
 
