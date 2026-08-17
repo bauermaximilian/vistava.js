@@ -134,10 +134,17 @@ export class ThumbnailTileView extends TileView {
          }, (e, s) => {
             updateSharedStyles(s, 1, 0.4);
          }, disposeThumbnailElement, true);
-      }  else {
-         disposeThumbnailElement(this.#thumbnailElement);
-         this.#thumbnailElement?.remove();
-         this.#thumbnailElement = null;
+      } else {
+         this.#insetLabel = true;
+         this.#thumbnailElement = cu(this.#thumbnailElement, GuiIconView, this.root, (e, s) => {
+            initializeSharedStyles(s);
+            e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
+            e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
+            e.presenter.model.icon = GuiIconNames["cross-box"];
+         }, (e, s) => {            
+            updateSharedStyles(s, 1, 0.4);
+            s.color = hasFocus ? "#d8d8d8" : "#b7b7b7"
+         }, disposeThumbnailElement, true);
       }
    }
 

@@ -15,7 +15,6 @@ import { TileFlows, TileFlowType } from "../Shared/TileFlowType.js";
 import { EventController } from "../../../Shared/Event.js";
 import { BrowserUtils, cu } from "../../../Utils/BrowserUtils.js";
 import { TileDataField } from "./TileDataField.js";
-import { NotSupportedError } from "../../../Errors/NotSupportedError.js";
 import { TilePresenter } from "./TilePresenter.js";
 import { TileFocuses } from "../Shared/TileFocusType.js";
 import { RU } from "../../../Utils/RectangleUtils.js";
@@ -23,6 +22,7 @@ import { RateLimiter } from "../../../Shared/RateLimiter.js";
 import { GuiIconView } from "../../GuiIcon/GuiIconView.js";
 import { GuiIconPresenter } from "../../GuiIcon/GuiIconPresenter.js";
 import { InputDeviceTypes } from "../../Shared/UserInput/InputDeviceType.js";
+import { InvalidOperationError } from "../../../Errors/InvalidOperationError.js";
 
 const tagName = "gallery-tile-view";
 
@@ -118,8 +118,7 @@ export class GalleryTileView extends TileView {
       const mediaType = this.presenter?.model.getDataAsString(TileDataField.mediaType) ?? "";
       const mediaUrl = this.presenter?.model.getDataAsString(TileDataField.mediaUrl) ?? "";
       /** @type {TileListEntryType} */ //@ts-ignore
-      const type = this.presenter?.model.getDataAsString(TileDataField.type) ?? "Media";
-      const isDisplayableInDetail = type === "Media";
+      const type = this.presenter?.model.getDataAsString(TileDataField.type);
       
       let transform = `translateX(${this.#movementController.offset.x}px) ` +
          `translateY(${this.#movementController.offset.y}px) ` +
@@ -169,7 +168,7 @@ export class GalleryTileView extends TileView {
                e.poster = mediaPreviewUrl;
             }
             cu(null, HTMLSourceElement, e, (e, s) => {
-               e.type = mediaType;
+               e.type = mediaType ?? "Media";
                e.src = mediaUrl;
                e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
             });
@@ -178,18 +177,20 @@ export class GalleryTileView extends TileView {
          });
       } else {
          this.#mediaElement = cu(this.#mediaElement, GuiIconView, this.#containerElement, (e, s) => {
+            e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
             s.width = "5em";
             s.color = "#b7b7b7";
             e.presenter = new GuiIconPresenter();
-            e.presenter.model.icon = "cross";
+            e.presenter.model.icon = "cross-circle";
          }, (e, s) => {
             s.transform = transform;
          });
 
          if (this.presenter !== null) {
-            if (!isDisplayableInDetail) {
-               this.presenter.contentError = new NotSupportedError(
-                  "The specified content type is not supported by the current view.");
+            if (mediaType === "" || mediaUrl === "") {
+               this.presenter.contentError = new InvalidOperationError("The specified element is empty.");
+            } else if (type === "Media") {
+               this.presenter.contentError = new InvalidOperationError("The specified media type is not supported.");
             }
          }
       }
@@ -239,6 +240,9 @@ export class GalleryTileView extends TileView {
          mediaElement.style.opacity = "1";
       } else if (mediaElement instanceof HTMLVideoElement) {
          mediaBounds = VU.new(mediaElement.videoWidth, mediaElement.videoHeight);
+      } else if (mediaElement instanceof GuiIconView) {
+         let bounds = mediaElement.getBoundingClientRect();
+         mediaBounds = VU.new(bounds.width, bounds.height);
       } else {
          mediaBounds = VU.new(0, 0);
       }

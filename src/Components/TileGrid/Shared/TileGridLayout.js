@@ -755,8 +755,7 @@ export class TileGridLayout extends TileGridLayoutBase {
 
 	getDistanceToVisibleArea(/** @type {number} */ tileIndex) {
 		if (this.#startPosition === null || this.#startPositionMaximum === null || this.#endPosition === null ||
-			this.#endPositionMinimum === null || this.#indexMinimum === null ||
-			!this.#dimensionsByTileIndex.has(tileIndex)) {
+			this.#endPositionMinimum === null || this.#indexMinimum === null) {
 			return null;
 		}
 

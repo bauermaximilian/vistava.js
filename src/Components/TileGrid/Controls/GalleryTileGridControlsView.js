@@ -259,7 +259,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 			s.top = "calc(50% - 1.5em)"
 			s.left = "calc(50% - 1.5em)"
 		}, (e, s) => {
-			if (this.focussedTile?.presenter?.contentSize == null) {
+			if (this.focussedTile?.presenter?.contentSize == null && 
+				this.focussedTile?.presenter?.contentError == null) {
 				s.opacity = "1";
 				s.animation = "5s linear 0s rotate infinite";
 			} else if (this.focussedTile?.presenter?.contentError != null) {

@@ -300,8 +300,7 @@ export class TileGridPresenter {
 		}
 
 		if (nextFocussedTileIndex !== null) {
-			this.focus(nextFocussedTileIndex, hidden);
-			return true;
+			return this.focus(nextFocussedTileIndex, hidden);
 		} else {
 			return false;
 		}
@@ -334,8 +333,7 @@ export class TileGridPresenter {
 		}
 
 		if (nextFocussedTileIndex !== null && nextFocussedTileIndex !== focussedTileIndex) {
-			this.focus(nextFocussedTileIndex, hidden);
-			return true;
+			return this.focus(nextFocussedTileIndex, hidden);
 		} else {
 			return false;
 		}
@@ -404,7 +402,7 @@ export class TileGridPresenter {
 	 * @throws {InvalidOperationError}
 	 */
 	reset(layoutType, size, referenceLayout) {
-		Assert.class(layoutType, TileGridLayoutType, "layoutType");
+		Assert.ifDefined(layoutType, () => Assert.class(layoutType, TileGridLayoutType, "layoutType"));
 		Assert.ifDefined(size, () => Assert.vectorPositive(size, "size"));
 
 		this.model.clear();
