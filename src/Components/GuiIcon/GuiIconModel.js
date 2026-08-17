@@ -115,6 +115,8 @@ export const GuiIconNames = Object.freeze({
    "loading": "loading",
    "exclamation": "exclamation",
    "cross": "cross",
+   "cross-circle": "cross-circle",
+   "cross-box": "cross-box",
    "check": "check",
    "plus": "plus",
    "minus": "minus",

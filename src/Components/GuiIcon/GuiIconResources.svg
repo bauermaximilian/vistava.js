@@ -1337,6 +1337,48 @@
    id="line395" />
 </g><g
    inkscape:groupmode="layer"
+   id="cross-circle"
+   inkscape:label="cross-circle"
+   style="display:none"
+   class="layer"><circle
+     style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+     id="path37"
+     cx="50"
+     cy="50"
+     class="icon"
+     r="45" /><path
+     style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+     d="M 35,35 65,65"
+     id="path38"
+     class="icon" /><path
+     style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+     d="M 65,35 35,65"
+     id="path39"
+     class="icon" /></g><g
+   inkscape:groupmode="layer"
+   id="cross-box"
+   inkscape:label="cross-box"
+   style="display:none"
+   class="layer"><path
+     style="fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+     d="M 35,35 65,65"
+     id="path40"
+     class="icon" /><path
+     style="fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+     d="M 65,35 35,65"
+     id="path41"
+     class="icon" /><rect
+     style="display:inline;fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+     id="rect1-6-5-67"
+     width="96"
+     height="96"
+     x="-98"
+     y="2"
+     ry="8"
+     class="icon"
+     rx="8"
+     transform="rotate(-90)" /></g><g
+   inkscape:groupmode="layer"
    class="layer"
    id="check"
    inkscape:label="check"
@@ -1434,7 +1476,7 @@
 	<polygon
    class="icon"
    style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10"
-   points="95.22,92.11 98.3,29.42 37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 "
+   points="31.5,41.75 1.7,41.75 4.27,92.11 95.22,92.11 98.3,29.42 37.67,29.42 "
    id="polygon417"
    transform="translate(0,-0.85292522)" />
 </g><g
@@ -1453,7 +1495,7 @@
 	<polygon
    class="icon"
    style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10"
-   points="95.22,92.11 98.3,29.42 37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 "
+   points="37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 95.22,92.11 98.3,29.42 "
    id="polygon2"
    transform="translate(0,-6.8529252)" />
 <path
@@ -1481,7 +1523,7 @@
 	<polygon
    class="icon"
    style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10"
-   points="95.22,92.11 98.3,29.42 37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 "
+   points="37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 95.22,92.11 98.3,29.42 "
    id="polygon1"
    transform="translate(0,-6.8529252)" />
 <path
@@ -1504,7 +1546,7 @@
 	<polygon
    class="icon"
    style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10"
-   points="1.7,41.75 4.27,92.11 95.22,92.11 98.3,29.42 37.67,29.42 31.5,41.75 "
+   points="95.22,92.11 98.3,29.42 37.67,29.42 31.5,41.75 1.7,41.75 4.27,92.11 "
    id="polygon2030"
    transform="translate(0,-6.8529252)" />
 <path
