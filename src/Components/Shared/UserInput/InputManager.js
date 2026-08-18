@@ -56,6 +56,8 @@ export class InputManager {
 
    /** @typedef {import("./InputEventsGroupController.js").ClickSecondaryEventArgs} ClickSecondaryEventArgs */
 
+   /** @typedef {import("./InputEventsGroupController.js").ClickTertiaryEventArgs} ClickTertiaryEventArgs */
+
    /** @typedef {import("./InputEventsGroupController.js").ScrollStartEventArgs} ScrollStartEventArgs */
 
    /** @typedef {import("./InputEventsGroupController.js").ScrollEventArgs} ScrollEventArgs */
@@ -157,6 +159,7 @@ export class InputManager {
       this.#mouse.onClick.subscribe(this.#handleOnClick);
       this.#mouse.onDoubleClick.subscribe(this.#handleOnDoubleClick);
       this.#mouse.onRightClick.subscribe(this.#handleOnClickSecondary);
+      this.#mouse.onMiddleClick.subscribe(this.#handleOnClickTertiary);
       this.#mouse.onDragStart.subscribe(this.#handleOnPointerDeviceMoveStart);
       this.#mouse.onDrag.subscribe(this.#handleOnMove);
       this.#mouse.onDragEnd.subscribe(this.#handleOnMoveEnd);
@@ -323,6 +326,23 @@ export class InputManager {
          noFurtherAction = groupArgs.noFurtherAction;
       }
    };
+
+   /**
+    * @param {{sender:any, position:Vector, target:EventTarget?}} args 
+    */   
+   #handleOnClickTertiary = (args) => { 
+      let noFurtherAction = false;
+      for (let controller of this.#inputEventGroupsList) {
+         /** @type {ClickTertiaryEventArgs} */
+         let groupArgs = {
+            ...args,
+            noFurtherAction: noFurtherAction,
+            inputDeviceType: this.#getInputDeviceTypeFromSender(args.sender)
+         };
+         controller.onClickTertiary.trigger(groupArgs);
+         noFurtherAction = groupArgs.noFurtherAction;
+      }
+   };
    
    /**
     * @param {{sender:any, target: EventTarget?}} args 
@@ -411,6 +431,7 @@ export class InputManager {
       this.#mouse.onClick.unsubscribe(this.#handleOnClick);
       this.#mouse.onDoubleClick.unsubscribe(this.#handleOnDoubleClick);
       this.#mouse.onRightClick.unsubscribe(this.#handleOnClickSecondary);
+      this.#mouse.onMiddleClick.unsubscribe(this.#handleOnClickTertiary);
       this.#mouse.onDragStart.unsubscribe(this.#handleOnPointerDeviceMoveStart);
       this.#mouse.onDrag.unsubscribe(this.#handleOnMove);
       this.#mouse.onDragEnd.unsubscribe(this.#handleOnMoveEnd);

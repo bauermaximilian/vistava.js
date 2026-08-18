@@ -59,6 +59,15 @@ import { InputManager } from "./InputManager.js";
 /**
 * @typedef {{
 *    inputDeviceType:InputDevice,
+*    position:Vector, 
+*    target:EventTarget?,
+*    noFurtherAction:boolean
+* }} ClickTertiaryEventArgs
+*/
+
+/**
+* @typedef {{
+*    inputDeviceType:InputDevice,
 *    target:EventTarget?
 * }} ScrollStartEventArgs
 */
@@ -100,6 +109,8 @@ export class InputEventsGroupController {
   #onDoubleClick = new EventController();
   /** @type {EventController<ClickSecondaryEventArgs>} */
   #onClickSecondary = new EventController();
+  /** @type {EventController<ClickTertiaryEventArgs>} */
+  #onClickTertiary = new EventController();
   /** @type {EventController<ScrollStartEventArgs>} */
   #onScrollStart = new EventController();
   /** @type {EventController<ScrollEventArgs>} */
@@ -129,6 +140,7 @@ export class InputEventsGroupController {
   get onClick() { return this.#onClick; }
   get onDoubleClick() { return this.#onDoubleClick; }
   get onClickSecondary() { return this.#onClickSecondary; }
+  get onClickTertiary() { return this.#onClickTertiary; }
   get onScrollStart() { return this.#onScrollStart; }
   get onScroll() { return this.#onScroll; }
   get onScrollEnd() { return this.#onScrollEnd; }   

@@ -13,6 +13,7 @@ export class InputEventsGroup {
    get onClick() { return this.#controller.onClick.event; }
    get onDoubleClick() { return this.#controller.onDoubleClick.event; }
    get onClickSecondary() { return this.#controller.onClickSecondary.event; }
+   get onClickTertiary() { return this.#controller.onClickTertiary.event; }
    get onScrollStart() { return this.#controller.onScrollStart.event; }
    get onScroll() { return this.#controller.onScroll.event; }
    get onScrollEnd() { return this.#controller.onScrollEnd.event; }   

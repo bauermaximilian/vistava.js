@@ -37,6 +37,8 @@ export class MouseInputManager {
    #leftClickStart = null;
    /** @type {{position: Vector, target: EventTarget?}?} */
    #rightClickStart = null;
+   /** @type {{position: Vector, target: EventTarget?}?} */
+   #middleClickStart = null;
    /** @type {Vector} */
    #positionCurrent = VU.new(0, 0);
    /** @type {Vector} */
@@ -61,6 +63,8 @@ export class MouseInputManager {
    #onDoubleClick = new EventController();
    /** @readonly @type {EventController<{sender: MouseInputManager, position:Vector, target:EventTarget?}>} */
    #onRightClick = new EventController();
+   /** @readonly @type {EventController<{sender: MouseInputManager, position:Vector, target:EventTarget?}>} */
+   #onMiddleClick = new EventController();
    /** @readonly @type {EventController<{sender: MouseInputManager, position:Vector, initialOffset:Vector, target:EventTarget?}>} */
    #onDragStart = new EventController();
    /** @readonly @type {EventController<{sender: MouseInputManager, offset:Vector, duration:number}>} */
@@ -80,6 +84,7 @@ export class MouseInputManager {
    get onClick() { return this.#onClick.event; }
    get onDoubleClick() { return this.#onDoubleClick.event; }
    get onRightClick() { return this.#onRightClick.event; }
+   get onMiddleClick() { return this.#onMiddleClick.event; }
    get onDragStart() { return this.#onDragStart.event; }
    get onDrag() { return this.#onDrag.event; }
    get onDragEnd() { return this.#onDragEnd.event; }
@@ -168,6 +173,13 @@ export class MouseInputManager {
 
       if (this.onRightClick.hasSubscribers && event.button === 2 && eventRelevant) {
          this.#rightClickStart = {
+            position: VU.new(event.clientX, event.clientY),
+            target: event.target
+         };
+      }
+
+      if (this.onMiddleClick.hasSubscribers && event.button === 1 && eventRelevant) {
+         this.#middleClickStart = {
             position: VU.new(event.clientX, event.clientY),
             target: event.target
          };
@@ -265,6 +277,16 @@ export class MouseInputManager {
             target: this.#rightClickStart.target 
          });
          this.#rightClickStart = null;
+      }
+
+      if (event.button === 1 && this.#middleClickStart && 
+         this.#dragStartedTimestamp === null && eventRelevant) {
+         this.#onMiddleClick.trigger({ 
+            sender: this,
+            position: this.#middleClickStart.position,
+            target: this.#middleClickStart.target 
+         });
+         this.#middleClickStart = null;
       }
 
       this.#lastActionTimestamp = performance.now();
