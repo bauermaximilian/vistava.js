@@ -23,9 +23,8 @@
       ".": "zoomOut",
       "-": "zoomOut",
       "f": "fullscreen",
-      "x": "fullscreen",
       "r": "reset",
       "m": "toggleMute",
-      "ContextMenu": "contextMenu"
+      "ContextMenu": "popup"
    }
 }

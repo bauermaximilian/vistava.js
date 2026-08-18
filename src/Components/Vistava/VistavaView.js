@@ -38,8 +38,8 @@ export class VistavaView extends PresenterView {
       this.#tryApplyViewTypes();
    }
 
-   get onTilePrimaryAction() { return this.#onTilePrimaryAction.event; }
-   get onTileSecondaryAction() { return this.#onTileSecondaryAction.event; }
+   get onTileActivate() { return this.#onTileActivate.event; }
+   get onTilePopup() { return this.#onTilePopup.event; }
    get onQueryChangeRequested() { return this.#onQueryChangeRequested.event; }
    get onBack() { return this.#onBack.event; }
 
@@ -51,9 +51,9 @@ export class VistavaView extends PresenterView {
    /** @typedef {import("../Shared/UserInput/InputManager.js").TargetElementDetacher} TargetElementDetacher */
 
    /** @type {EventController<TileActionEventArgs>} */
-   #onTilePrimaryAction = new EventController();
+   #onTileActivate = new EventController();
    /** @type {EventController<TileActionEventArgs>} */
-   #onTileSecondaryAction = new EventController();
+   #onTilePopup = new EventController();
    /** @type {EventController<void>} */
    #onBack = new EventController();
    /** @type {EventController<VistavaQueryChangeRequestedEventArgs>} */
@@ -178,10 +178,12 @@ export class VistavaView extends PresenterView {
          e.inputManager = null;
       
          if (e instanceof ThumbnailTileGridControlsView) {
-            e.onTileActivated.unsubscribe(this.#handleOnTileActivated);
+            e.onTileActivate.unsubscribe(this.#handleOnTileActivate);
+            e.onTilePopup.unsubscribe(this.#handleOnTilePopup);
             e.onBack.unsubscribe(this.#handleOnBack);
          } else if (e instanceof GalleryTileGridControlsView) {
             e.onBack.unsubscribe(this.#handleOnBack);
+            e.onTilePopup.unsubscribe(this.#handleOnTilePopup);
          }
       };
       if (this.#tileGridControlsViewType !== null) {
@@ -190,10 +192,12 @@ export class VistavaView extends PresenterView {
             e.tileGridView = this.#gridView;
          
             if (e instanceof ThumbnailTileGridControlsView) {
-               e.onTileActivated.subscribe(this.#handleOnTileActivated);
+               e.onTileActivate.subscribe(this.#handleOnTileActivate);
+               e.onTilePopup.subscribe(this.#handleOnTilePopup);
                e.onBack.subscribe(this.#handleOnBack);
             } else if (e instanceof GalleryTileGridControlsView) {
                e.onBack.subscribe(this.#handleOnBack);
+               e.onTilePopup.subscribe(this.#handleOnTilePopup);
             }
          }, (e, s) => {
             e.inputManager ??= this.#inputManager;
@@ -264,10 +268,18 @@ export class VistavaView extends PresenterView {
    };
 
    /** @type {EventHandler<{tileIndex:number}>} */
-   #handleOnTileActivated = (args) => {
+   #handleOnTileActivate = (args) => {
       let tile = this.#gridView?.getTileByIndex(args.tileIndex) ?? null;
       if (tile !== null) {
-         this.#onTilePrimaryAction.trigger({ tile });
+         this.#onTileActivate.trigger({ tile });
+      }
+   };
+
+   /** @type {EventHandler<{tileIndex:number}>} */
+   #handleOnTilePopup = (args) => {
+      let tile = this.#gridView?.getTileByIndex(args.tileIndex) ?? null;
+      if (tile !== null) {
+         this.#onTilePopup.trigger({ tile });
       }
    };
 

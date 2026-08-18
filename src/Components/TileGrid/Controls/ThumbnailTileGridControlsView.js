@@ -11,8 +11,9 @@ const tagName = "thumbnail-grid-controls";
 export class ThumbnailTileGridControlsView extends TileGridControlsView {
    static get tagName() { return tagName; }
 
-   get onTileActivated() { return this.#onTileActivated.event; }
+   get onTileActivate() { return this.#onTileActivate.event; }
    get onBack() { return this.#onBack.event; }
+   get onTilePopup() { return this.#onTilePopup.event; }
 
    /** @template T @typedef {import("../../../Shared/Event.js").EventHandler<T>} EventHandler<T> */
    /** @template T @typedef {import("../../../Shared/Event.js").ValueChangedEventArgs<T>} ValueChangedEventArgs<T> */
@@ -20,7 +21,9 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
 	/** @typedef {import("../../Shared/UserInput/InputEventsGroupController.js").ClickEventArgs} ClickEventArgs */
 
    /** @type {EventController<{tileIndex:number}>} */
-   #onTileActivated = new EventController();
+   #onTileActivate = new EventController();
+   /** @type {EventController<{tileIndex:number}>} */
+   #onTilePopup = new EventController();
    /** @type {EventController<void>} */
    #onBack = new EventController();
 
@@ -51,10 +54,12 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
    #handleOnInputEventsGroupChanged = (args) => {
       args.oldValue?.onClick.unsubscribe(this.#handleOnClick);
       args.oldValue?.onClickSecondary.unsubscribe(this.#handleOnClickSecondary);
+      args.oldValue?.onClickTertiary.unsubscribe(this.#handleOnClickTertiary);
       args.oldValue?.onAction.unsubscribe(this.#handleOnAction);
 
       args.newValue?.onClick.subscribe(this.#handleOnClick);
       args.newValue?.onClickSecondary.subscribe(this.#handleOnClickSecondary);
+      args.newValue?.onClickTertiary.subscribe(this.#handleOnClickTertiary);
       args.newValue?.onAction.subscribe(this.#handleOnAction);
    };
 
@@ -79,7 +84,7 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
 
       let focussedTileIndex = this.#updateFocusToPosition(args.position);
       if (focussedTileIndex !== null) {
-         this.#onTileActivated.trigger({ tileIndex: focussedTileIndex });
+         this.#onTileActivate.trigger({ tileIndex: focussedTileIndex });
          args.noFurtherAction = true;
       }
    };
@@ -95,6 +100,20 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
       args.noFurtherAction = true;
    }
 
+   /** @type {EventHandler<ClickEventArgs>} */
+   #handleOnClickTertiary = (args) => {
+      if (this.tileGridView?.presenter == null) { return; }
+
+      if (args.noFurtherAction || !this.tileGridView.isWithinBounds(args.position)) { return; }
+
+      let tileIndex = this.tileGridView?.getTileIndexByPosition(args.position) ?? null;
+      if (tileIndex != null) {
+         this.#onTilePopup.trigger({ tileIndex });
+      }
+
+      args.noFurtherAction = true;
+   }
+
    /** @type {EventHandler<ActionEventArgs>} */
    #handleOnAction = (args) => {
       if (this.tileGridView?.presenter == null) { return; }
@@ -105,13 +124,18 @@ export class ThumbnailTileGridControlsView extends TileGridControlsView {
          if (!this.tileGridView.presenter.focusVisible) {
             this.tileGridView.presenter.focus(this.tileGridView.presenter.focussedTileIndex, false);
          } else {
-            this.#onTileActivated.trigger({ tileIndex: this.tileGridView.presenter.focussedTileIndex });
+            this.#onTileActivate.trigger({ tileIndex: this.tileGridView.presenter.focussedTileIndex });
          }
          args.noFurtherAction = true;
       } else if (args.action === "back") {
          this.#onBack.trigger();
       } else if (args.action === "fullscreen") {
          BrowserUtils.toggleFullscreen();
+      } else if (args.action === "popup") {
+         let tileIndex = this.focussedTile?.presenter?.model.index;
+         if (tileIndex != null) {
+            this.#onTilePopup.trigger({ tileIndex });
+         }
       }
    }
 }

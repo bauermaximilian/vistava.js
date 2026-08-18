@@ -24,6 +24,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	static get tagName() { return tagName; }
 
 	get onBack() { return this.#onBack.event; }
+	get onTilePopup() { return this.#onTilePopup.event; }
 
 	/** @typedef {import("../../../Utils/VectorUtils.js").Vector} Vector */
 	/** @template T @typedef {import("../../../Shared/Event.js").EventHandler<T>} EventHandler<T> */
@@ -93,6 +94,8 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 
 	/** @type {EventController<void>} */
 	#onBack = new EventController();
+   /** @type {EventController<{tileIndex:number}>} */
+   #onTilePopup = new EventController();
 
 	constructor() {
 		super();     
@@ -436,6 +439,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	#handleOnInputEventsGroupChanged = (args) => {
 		args.oldValue?.onClick.unsubscribe(this.#handleOnClick);
 		args.oldValue?.onDoubleClick.unsubscribe(this.#handleOnDoubleClick);
+		args.oldValue?.onClickTertiary.unsubscribe(this.#handleOnClickTertiary);
 		// args.oldValue?.onClickSecondary.unsubscribe(this.#handleOnClickSecondary);
 		args.oldValue?.onAction.unsubscribe(this.#handleOnAction);
 		args.oldValue?.onMoveStart.unsubscribe(this.#handleOnMoveStart);
@@ -446,6 +450,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 
 		args.newValue?.onClick.subscribe(this.#handleOnClick);
 		args.newValue?.onDoubleClick.subscribe(this.#handleOnDoubleClick);
+		args.newValue?.onClickTertiary.subscribe(this.#handleOnClickTertiary);
 		// args.newValue?.onClickSecondary.subscribe(this.#handleOnClickSecondary);
 		args.newValue?.onAction.subscribe(this.#handleOnAction);
 		args.newValue?.onMoveStart.subscribe(this.#handleOnMoveStart);
@@ -500,7 +505,12 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 			this.#onBack.trigger();			
 		} else if (args.action === "fullscreen") {
 			BrowserUtils.toggleFullscreen();
-		} else if (this.#videoController.hasVideoElement) {
+		} else if (args.action === "popup") {
+         let tileIndex = this.focussedTile?.presenter?.model.index;
+         if (tileIndex != null) {
+            this.#onTilePopup.trigger({ tileIndex });
+         }
+      } else if (this.#videoController.hasVideoElement) {
 			if (args.action === "confirm" || args.action === "play") {
 				this.#videoController.togglePlay();
 			} else if (args.action === "toggleMute") {
@@ -572,6 +582,20 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 		} else if (BrowserUtils.isInside(this.#buttonNext, args.position)) {
 			args.noFurtherAction = true;
 		}
+	};
+
+	/** @type {EventHandler<ClickEventArgs>} */
+	#handleOnClickTertiary = (args) => {
+		if (this.tileGridView?.presenter == null) { return; }
+
+		if (args.noFurtherAction || !this.tileGridView.isWithinBounds(args.position)) { return; }
+
+		let tileIndex = this.tileGridView?.getTileIndexByPosition(args.position) ?? null;
+		if (tileIndex != null) {
+			this.#onTilePopup.trigger({ tileIndex });
+		}
+
+		args.noFurtherAction = true;
 	};
 
 	/**
