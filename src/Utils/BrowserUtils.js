@@ -413,8 +413,12 @@ export class BrowserUtils {
 		if (configText != null) {
 			try {
 				let configObject = JSON.parse(configText);
-				callback(configObject);
-				console.info(`Loaded user configuration from "${url}".`);
+				if (configObject != null) {
+					callback(configObject);
+					console.info(`Loaded user configuration from "${url}".`);
+				} else {
+					console.info(`No user configuration found at "${url}" - using default configuration instead.`);
+				}
 			} catch (error) {
 				console.error(`User configuration from "${url}" couldn't be loaded. ${error}`);
 			}
