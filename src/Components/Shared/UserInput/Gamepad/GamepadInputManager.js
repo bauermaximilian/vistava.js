@@ -8,7 +8,7 @@ import { GamepadProfile } from "./GamepadProfile.js";
 import { VectorUtils as V } from "../../../../Utils/VectorUtils.js";
 import { GamepadInputManagerSettings } from "./GamepadInputManagerSettings.js";
 import { AU } from "../../../../Utils/ArrayUtils.js";
-import defaultConfiguration from "../Configurations/gamepad.json" with { type: "json" };
+import { GlobalConfiguration } from "../../../../Shared/GlobalConfiguration.js";
 
 export class GamepadInputManager {
    /** 
@@ -30,7 +30,7 @@ export class GamepadInputManager {
    #newGamepadPollingInterval = 1000;
 
    /** @type {GamepadInputManagerSettings} */
-   #settings = GamepadInputManagerSettings.fromConfiguration(defaultConfiguration);
+   #settings = GlobalConfiguration.gamepadSettings;
 
    /** @type {HTMLElement?} */
    #targetElement = null;

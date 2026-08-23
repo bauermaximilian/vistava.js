@@ -5,7 +5,7 @@ import { InvalidOperationError } from "../../../Errors/InvalidOperationError.js"
 import { EventController } from "../../../Shared/Event.js";
 import { VectorUtils as V } from "../../../Utils/VectorUtils.js";
 import { KeyboardInputManagerSettings } from "./KeyboardInputManagerSettings.js";
-import defaultConfiguration from "./Configurations/keyboard.json" with { type: "json" };
+import { GlobalConfiguration } from "../../../Shared/GlobalConfiguration.js";
 
 export class KeyboardInputManager {
    /** @readonly @type {number} */
@@ -32,7 +32,7 @@ export class KeyboardInputManager {
    #startedKeyActions = new Map();
 
    /** @type {KeyboardInputManagerSettings} */
-   #settings = KeyboardInputManagerSettings.fromConfiguration(defaultConfiguration);
+   #settings = GlobalConfiguration.keyboardSettings;
 
    /** @type {EventController<{sender:KeyboardInputManager, initialOffset:Vector}>} */
    #onMoveStart = new EventController();
