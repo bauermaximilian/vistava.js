@@ -1,0 +1,12 @@
+{
+   "thumbnails": {
+      "showVideoLabels": true,
+      "showImageLabels": true
+   },
+   "gallery": {
+      "muteVideosByDefault": false,
+      "loopVideos": true,
+      "zoomToTop": true,
+      "doubleClickZooms": false
+   }
+}

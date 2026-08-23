@@ -23,6 +23,7 @@ import { GuiIconView } from "../../GuiIcon/GuiIconView.js";
 import { GuiIconPresenter } from "../../GuiIcon/GuiIconPresenter.js";
 import { InputDeviceTypes } from "../../Shared/UserInput/InputDeviceType.js";
 import { InvalidOperationError } from "../../../Errors/InvalidOperationError.js";
+import { GlobalConfiguration } from "../../../Shared/GlobalConfiguration.js";
 
 const tagName = "gallery-tile-view";
 
@@ -481,9 +482,8 @@ class GalleryTileViewMovementController {
          let contentBounds = this.#calculateContentBounds(this.#offset, 
             this.#zoomAgent.currentValue);
          if (contentBounds !== null) {
-            //let contentIsInPortraitMode = (contentBounds.width) / (contentBounds.height) < 0.8;
-            //let contentOverflowsVisibleArea = (contentBounds.left < 0 || contentBounds.top < 0);
-            if (/* contentIsInPortraitMode && */ this.#zoomInputAgent.currentValue > 0) {
+            if (GlobalConfiguration.tileGridSettings.gallerySettings.zoomToTop &&
+               this.#zoomInputAgent.currentValue > 0) {
                // HACK: Zooms into the top of the image
                this.#movementMomentumAgent.addToCurrentValue(
                   VU.new(0, ((this.#contentSize?.y ?? 0) * this.#zoomAgent.currentValue)));
@@ -814,7 +814,8 @@ class GalleryTileViewMovementController {
    /** @type {EventHandler<DoubleClickEventArgs>} */
    #handleOnDoubleClick = (args) => {
       if (this.#hasFocus && !args.noFurtherAction) {
-         if (args.inputDeviceType === InputDeviceTypes.mouse) {
+         if (args.inputDeviceType === InputDeviceTypes.touch || (args.inputDeviceType === InputDeviceTypes.mouse &&
+            !GlobalConfiguration.tileGridSettings.gallerySettings.doubleClickZooms)) {
             BrowserUtils.toggleFullscreen();
          } else {
             this.toggleNextScaleStep();

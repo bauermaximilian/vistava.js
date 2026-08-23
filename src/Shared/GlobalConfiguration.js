@@ -2,11 +2,21 @@
 
 import { GamepadInputManagerSettings } from "../Components/Shared/UserInput/Gamepad/GamepadInputManagerSettings.js";
 import { KeyboardInputManagerSettings } from "../Components/Shared/UserInput/KeyboardInputManagerSettings.js";
+import { TileGridSettings } from "./TileGridSettings.js";
 import { Assert } from "./Assert.js";
 import defaultKeyboardConfiguration from "./Configurations/keyboard.json" with { type: "json" };
 import defaultGamepadConfiguration from "./Configurations/gamepad.json" with { type: "json" };
+import defaultApplicationConfiguration from "./Configurations/tilegrid.json" with { type: "json" };
 
-export class GlobalConfiguration {    
+export class GlobalConfiguration {  
+   static get tileGridSettings() { return this.#tileGridSettings; }
+   static set tileGridSettings(value) {
+      if (value !== this.#tileGridSettings) {
+         Assert.class(value, TileGridSettings, undefined, true);
+         this.#tileGridSettings = value;
+      }
+   }
+   
    static get gamepadSettings() { return this.#gamepadSettings; }
    static set gamepadSettings(value) {
       if (value !== this.#gamepadSettings) {
@@ -27,4 +37,6 @@ export class GlobalConfiguration {
    static #keyboardSettings = KeyboardInputManagerSettings.fromConfiguration(defaultKeyboardConfiguration);
    /** @type {GamepadInputManagerSettings} */
    static #gamepadSettings = GamepadInputManagerSettings.fromConfiguration(defaultGamepadConfiguration);
+   /** @type {TileGridSettings} */
+   static #tileGridSettings = TileGridSettings.fromConfiguration(defaultApplicationConfiguration);
 }

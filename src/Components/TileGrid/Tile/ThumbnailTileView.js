@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { GlobalConfiguration } from "../../../Shared/GlobalConfiguration.js";
 import { cu } from "../../../Utils/BrowserUtils.js";
 import { VU } from "../../../Utils/VectorUtils.js";
 import { GuiIconNames } from "../../GuiIcon/GuiIconModel.js";
@@ -204,6 +205,15 @@ export class ThumbnailTileView extends TileView {
       const paddingLeft = 12;
 
       let labelText = this.presenter?.model.getDataAsString(TileDataField.label, false) ?? null;
+      let mediaType = this.presenter?.model.getDataAsString(TileDataField.mediaType) ?? null;
+      let showLabelsOnVideos = GlobalConfiguration.tileGridSettings.thumbnailSettings.showVideoLabels;
+      let showLabelsOnImages = GlobalConfiguration.tileGridSettings.thumbnailSettings.showImageLabels;
+
+      if ((mediaType?.startsWith("video") === true && !showLabelsOnVideos) ||
+         (mediaType?.startsWith("image") === true && !showLabelsOnImages)) {
+         labelText = null;
+      }
+
       if ((labelText === null || labelText.trim().length === 0) && reserveLabelSpace) {
          labelText = "\u00a0";
       }

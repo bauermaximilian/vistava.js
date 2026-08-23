@@ -2,6 +2,7 @@
 
 import { Assert } from "../../Shared/Assert.js";
 import { EventController } from "../../Shared/Event.js";
+import { GlobalConfiguration } from "../../Shared/GlobalConfiguration.js";
 
 export class VideoController {
    /** @type {EventController<void>} */
@@ -21,6 +22,8 @@ export class VideoController {
    static #initialVolume = 1;
    /** @type {boolean} */
    static #initalLoop = true;
+   /** @type {boolean} */
+   static #appliedGlobalConfiguration = false;
 
    get onUpdateVolume() { return this.#onUpdateVolume.event; }
    get onUpdatePosition() { return this.#onUpdatePosition.event; }
@@ -172,6 +175,16 @@ export class VideoController {
    }
 
    get shouldBePlaying() { return this.#initialPlaying; }
+
+   constructor() {
+      if (!VideoController.#appliedGlobalConfiguration) {
+         VideoController.#initialIsMuted =
+            GlobalConfiguration.tileGridSettings.gallerySettings.muteVideosByDefault;
+         VideoController.#initalLoop =
+            GlobalConfiguration.tileGridSettings.gallerySettings.loopVideos;
+         VideoController.#appliedGlobalConfiguration = true;
+      }
+   }
 
    togglePlay() {
       if (this.shouldBePlaying) {
