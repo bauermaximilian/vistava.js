@@ -41,10 +41,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static false(value, name) {
-      if (!Assert.#isActive) {
+   static false(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) {
          return;
       }
 
@@ -58,10 +60,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static true(value, name) {
-      if (!Assert.#isActive) {
+   static true(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) {
          return;
       }
 
@@ -76,10 +80,12 @@ export class Assert {
     * @param {any} valueExpected The expected value.
     * @param {any} valueActual The actual value.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static equals(valueExpected, valueActual, name) {
-      if (!Assert.#isActive) { 
+   static equals(valueExpected, valueActual, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -95,10 +101,12 @@ export class Assert {
     * @param {any} valueExpected The expected value.
     * @param {any} valueActual The actual value.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static equalsNot(valueExpected, valueActual, name) {
-      if (!Assert.#isActive) { 
+   static equalsNot(valueExpected, valueActual, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -118,9 +126,15 @@ export class Assert {
     * additional members in {@link actualValue} that do not exist in {@link expectedValue}, false to
     * throw an {@link ArgumentError} in such cases.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static equivalent(expectedValue, actualValue, allowAdditionalMembersInActual = true, name) {
+   static equivalent(expectedValue, actualValue, allowAdditionalMembersInActual = true, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
+         return; 
+      }
+      
       if (typeof (expectedValue) === typeof (actualValue)) {
          if (typeof (expectedValue) === "object") {
             let keysExpected = Object.keys(expectedValue);
@@ -132,7 +146,7 @@ export class Assert {
                if (typeof (memberValueExpected) === typeof (memberValueActual) &&
                   typeof (memberValueExpected) === "object") {
                   Assert.equivalent(memberValueExpected, memberValueActual, allowAdditionalMembersInActual,
-                     `${name ?? "value"}.${key}`);
+                     `${name ?? "value"}.${key}`, forceAssert);
                } else if (memberValueExpected !== memberValueActual) {
                   AssertUtils.throwArgumentError(`The member \"${key}\" in the value~ does not ` +
                      (memberValueActual !== undefined ? "have the expected member value." : "exist."));
@@ -147,7 +161,7 @@ export class Assert {
                }
             }
          } else {
-            Assert.equals(expectedValue, actualValue, name);
+            Assert.equals(expectedValue, actualValue, name, forceAssert);
          }
       } else {
          AssertUtils.throwArgumentError("The value~ has a different type than expected.");
@@ -162,8 +176,8 @@ export class Assert {
     * @param {string} [name] The name of the function for the error message. Optional.
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static throws(callback, expectedErrorType = Error, name) {
-      if (!Assert.#isActive) { 
+   static throws(callback, expectedErrorType = Error, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -191,16 +205,18 @@ export class Assert {
     * @param {any[]} value The array variable to be checked.
     * @param {any} expectedValueElement The element which should be asserted to be in the specified value array.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static contains(value, expectedValueElement, name) {
-      if (!Assert.#isActive) { 
+   static contains(value, expectedValueElement, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
       if (expectedValueElement === undefined) {
          AssertUtils.throwArgumentError("The expected value, which must be in the array, is undefined.");
       }
-      Assert.array(value, name);
+      Assert.array(value, name, forceAssert);
       if (!value.includes(expectedValueElement)) {
          AssertUtils.throwArgumentError("The array~ does not contain a specific required element.", name);
       }
@@ -211,14 +227,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any[]} value The array variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static containsAny(value, name) {
-      if (!Assert.#isActive) { 
+   static containsAny(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.array(value, name);
+      Assert.array(value, name, forceAssert);
       if (value.length === 0) {
          AssertUtils.throwArgumentError("The array~ does not contain any elements.", name);
       }
@@ -229,10 +247,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static defined(value, name) {
-      if (!Assert.#isActive) { 
+   static defined(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -246,10 +266,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static number(value, name) {
-      if (!Assert.#isActive) { 
+   static number(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -266,14 +288,16 @@ export class Assert {
     * to 0 (and not NaN or infinite) and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static numberPositiveOrZero(value, name) {
-      if (!Assert.#isActive) { 
+   static numberPositiveOrZero(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.number(value, name);
+      Assert.number(value, name, forceAssert);
       if (typeof(value) === "number" && value < 0) {
          AssertUtils.throwArgumentError("The value~ is neither a positive number nor zero.", name);
       }
@@ -284,14 +308,16 @@ export class Assert {
     * (and not NaN or infinite) and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static numberPositive(value, name) {
-      if (!Assert.#isActive) { 
+   static numberPositive(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.number(value, name);
+      Assert.number(value, name, forceAssert);
       if (typeof(value) === "number" && value <= 0) {
          AssertUtils.throwArgumentError("The value~ is no positive number.", name);
       }
@@ -305,14 +331,16 @@ export class Assert {
     * @param {number} min The minimum allowed value for {@link value}.
     * @param {number} max The maximum allowed value for {@link value}.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static numberInRange(value, min, max, name) {
-      if (!Assert.#isActive) { 
+   static numberInRange(value, min, max, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.number(value, name);
+      Assert.number(value, name, forceAssert);
       if (typeof(value) === "number" && (value < min || value > max)) {
          AssertUtils.throwArgumentError("The value~ exceeds the valid range for this.", name);
       }
@@ -323,14 +351,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static numberInteger(value, name) {
-      if (!Assert.#isActive) { 
+   static numberInteger(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.number(value, name);
+      Assert.number(value, name, forceAssert);
       if (Math.floor(value) !== value) {
          AssertUtils.throwArgumentError("The value~ is no integer number.", name);
       }
@@ -342,14 +372,16 @@ export class Assert {
     * assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */   
-   static numberIntegerPositive(value, name) {
-      if (!Assert.#isActive) { 
+   static numberIntegerPositive(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.numberInteger(value, name);
+      Assert.numberInteger(value, name, forceAssert);
       if (value <= 0) {
          AssertUtils.throwArgumentError("The value~ is no positive integer number.", name);
       }
@@ -361,14 +393,16 @@ export class Assert {
     * assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */   
-   static numberIntegerPositiveOrZero(value, name) {
-      if (!Assert.#isActive) { 
+   static numberIntegerPositiveOrZero(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.numberInteger(value, name);
+      Assert.numberInteger(value, name, forceAssert);
       if (value < 0) {
          AssertUtils.throwArgumentError("The value~ is no positive integer number or zero.", name);
       }
@@ -382,15 +416,17 @@ export class Assert {
     * @param {any} value The variable to be checked.
     * @param {Array} array The array the specified {@link value} should be checked against.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static arrayIndex(value, array, name) {
-      if (!Assert.#isActive) { 
+   static arrayIndex(value, array, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.array(array, "array");
-      Assert.numberInRange(value, 0, array.length - 1, name);
+      Assert.array(array, name, forceAssert);
+      Assert.numberInRange(value, 0, array.length - 1, name, forceAssert);
    }
 
    /**
@@ -398,14 +434,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static string(value, name) {
-      if (!Assert.#isActive) { 
+   static string(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.defined(value, name);
+      Assert.defined(value, name, forceAssert);
       if (typeof(value) !== "string") {
          AssertUtils.throwArgumentError("The value~ is not a string.", name);
       }
@@ -416,10 +454,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static stringOrNull(value, name) {
-      if (!Assert.#isActive) { 
+   static stringOrNull(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -433,14 +473,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static stringNotEmpty(value, name) {
-      if (!Assert.#isActive) { 
+   static stringNotEmpty(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.string(value, name);
+      Assert.string(value, name, forceAssert);
       if (typeof(value) === "string" && value.length === 0) {
          AssertUtils.throwArgumentError("The value~ must not be empty.");
       }
@@ -451,14 +493,16 @@ export class Assert {
     * whitespaces only and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static stringNotEmptyOrWhitespacesOnly(value, name) {
-      if (!Assert.#isActive) { 
+   static stringNotEmptyOrWhitespacesOnly(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.string(value, name);
+      Assert.string(value, name, forceAssert);
       if (typeof(value) === "string" && value.trim().length === 0) {
          AssertUtils.throwArgumentError("The value~ must not be empty or whitespaces only.");
       }
@@ -469,14 +513,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static boolean(value, name) {
-      if (!Assert.#isActive) { 
+   static boolean(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.defined(value, name);
+      Assert.defined(value, name, forceAssert);
       if (typeof(value) !== "boolean") {
          AssertUtils.throwArgumentError("The value~ is not of type boolean.", name);
       }
@@ -487,14 +533,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static function(value, name) {
-      if (!Assert.#isActive) { 
+   static function(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.defined(value, name);
+      Assert.defined(value, name, forceAssert);
       if (typeof(value) !== "function") {
          AssertUtils.throwArgumentError("The value~ is not a string.", name);
       }
@@ -505,14 +553,16 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static array(value, name) {
-      if (!Assert.#isActive) { 
+   static array(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.defined(value, name);
+      Assert.defined(value, name, forceAssert);
       if (!Array.isArray(value)) {
          AssertUtils.throwArgumentError("The value~ is not an array.", name);
       }
@@ -525,14 +575,16 @@ export class Assert {
     * @param {any} value The variable to be checked.
     * @param {string} type The expected type name of the values in the specified array.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static arrayOfType(value, type, name) {
-      if (!Assert.#isActive) { 
+   static arrayOfType(value, type, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.array(value, name);
+      Assert.array(value, name, forceAssert);
       for (let i = 0; i < value.length; i++) {
          Assert.type(value[i], type, `${name}[${i}]`);
       }
@@ -544,16 +596,18 @@ export class Assert {
     * @param {any} value The variable to be checked.
     * @param {new (...args) => any} variableClass The expected class of the specified {@link value}.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static arrayOfClass(value, variableClass, name) {
-      if (!Assert.#isActive) { 
+   static arrayOfClass(value, variableClass, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.array(value, name);
+      Assert.array(value, name, forceAssert);
       for (let i = 0; i < value.length; i++) {
-         Assert.class(value[i], variableClass, `${name ?? "value"}[${i}]`);
+         Assert.class(value[i], variableClass, `${name ?? "value"}[${i}]`, forceAssert);
       }
    }
 
@@ -561,10 +615,12 @@ export class Assert {
     * Asserts that a specified {@link value} is a valid {@link Vector} object.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static vector(value, name) {
-      if (!Assert.#isActive) { 
+   static vector(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -577,10 +633,12 @@ export class Assert {
     * Asserts that a specified {@link value} is a valid {@link Rectangle} object.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static rectangle(value, name) {
-      if (!Assert.#isActive) {
+   static rectangle(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) {
          return;
       }
 
@@ -593,14 +651,16 @@ export class Assert {
     * Asserts that a specified {@link value} is a valid, non-empty {@link Rectangle} object.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static rectangleNotEmpty(value, name) {
-      if (!Assert.#isActive) {
+   static rectangleNotEmpty(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) {
          return;
       }
 
-      Assert.defined(value, name);
+      Assert.defined(value, name, forceAssert);
       let isRectangle = RectangleUtils.isRectangle(value);
       if (!isRectangle || (isRectangle && RectangleUtils.isEmpty(value))) {
          AssertUtils.throwArgumentError("The value~ is not a valid non-empty rectangle.", name);
@@ -612,14 +672,16 @@ export class Assert {
     * of the vector components having a value equal to or less than 0.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static vectorPositive(value, name) {
-      if (!Assert.#isActive) { 
+   static vectorPositive(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.vector(value, name);
+      Assert.vector(value, name, forceAssert);
       if (value.x <= 0) {
          AssertUtils.throwArgumentError(
             "The X component of the vector~ is equal to or smaller than 0.", name);
@@ -634,14 +696,16 @@ export class Assert {
     * of the vector components having a value of less than 0.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static vectorPositiveOrZero(value, name) {
-      if (!Assert.#isActive) { 
+   static vectorPositiveOrZero(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.vector(value, name);
+      Assert.vector(value, name, forceAssert);
       if (value.x < 0) {
          AssertUtils.throwArgumentError("The X component of the vector~ is smaller than 0.", name);
       } else if (value.y < 0) {
@@ -654,14 +718,16 @@ export class Assert {
     * of the vector components having a value of 0.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static vectorNonZero(value, name) {
-      if (!Assert.#isActive) { 
+   static vectorNonZero(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.vector(value, name);
+      Assert.vector(value, name, forceAssert);
       if (value.x === 0) {
          AssertUtils.throwArgumentError("The X component of the vector~ is 0.", name);
       } else if (value.y === 0) {
@@ -673,10 +739,12 @@ export class Assert {
     * Asserts that a specified {@link value} is a valid {@link Transform} object.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static transform(value, name) {
-      if (!Assert.#isActive) { 
+   static transform(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -692,10 +760,12 @@ export class Assert {
     * @param {any} value The variable to be checked.
     * @param {string} type The expected type name of the specified {@link value}.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static type(value, type, name) {
-      if (!Assert.#isActive) { 
+   static type(value, type, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -711,10 +781,12 @@ export class Assert {
     * @param {any} value The variable to be checked.
     * @param {new (...args) => any} valueClass The expected class of the specified {@link value}.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static class(value, valueClass, name) {
-      if (!Assert.#isActive) { 
+   static class(value, valueClass, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -729,9 +801,12 @@ export class Assert {
     * and throws an error if this assertion is not met.
     * @param {any} value The variable to be checked.
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
+    * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static classType(value, name) {
-      if (!Assert.#isActive) { 
+   static classType(value, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -746,9 +821,12 @@ export class Assert {
     * {@link value} is defined (not undefined nor null).
     * @param {any} value The variable to be checked.
     * @param {()=>void} callback The callback to be executed if the {@link value} is defined.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
+    * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static ifDefined(value, callback) {
-      if (!Assert.#isActive) { 
+   static ifDefined(value, callback, forceAssert) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
@@ -763,14 +841,17 @@ export class Assert {
     * @param {new (...args) => any} $class The (child) class to be checked.
     * @param {new (...args) => any} parentClass The parent class.
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
+    * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static inherits($class, parentClass) {
-      if (!Assert.#isActive) { 
+   static inherits($class, parentClass, forceAssert) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
 
-      Assert.defined($class, "$class");
-      Assert.defined(parentClass, "parentClass");
+      Assert.defined($class, "$class", forceAssert);
+      Assert.defined(parentClass, "parentClass", forceAssert);
 
       if (!$class?.prototype || !$class.name) {
          AssertUtils.throwArgumentError(
@@ -797,13 +878,15 @@ export class Assert {
     * as a property of the {@link enumTypeInstance} class (false, default), or if "combined" values (created with the
     * method of the same name) are also allowed (true).
     * @param {string} [name] The name of the variable for the error message. Optional.
+    * @param {boolean} [forceAssert=false] True to force the assertion check even if {@link isActive}
+    * is false; false to skip the assertion check if {@link isActive} is false (default).
     * @throws {ArgumentError} Is thrown when the current assertion is not met.
     */
-   static enumType(value, enumTypeInstance, allowCombined = false, name) {
-      if (!Assert.#isActive) { 
+   static enumType(value, enumTypeInstance, allowCombined = false, name, forceAssert = false) {
+      if (!Assert.#isActive && !forceAssert) { 
          return; 
       }
-      Assert.class(enumTypeInstance, EnumType, "enumTypeInstance");
+      Assert.class(enumTypeInstance, EnumType, "enumTypeInstance", forceAssert);
       
       if (!allowCombined && !enumTypeInstance.isDefined(value)) {
          AssertUtils.throwArgumentError(
