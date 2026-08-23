@@ -29,7 +29,12 @@ const tagName = "vistava-viewer";
 
 /** @extends {PresenterView<VistavaPresenter>} */
 export class VistavaView extends PresenterView {
-   static get tagName() { return tagName; }   
+   static get tagName() { return tagName; } 
+   
+   /** @type {number} Gets the input priority of the primary input group used by this component. */
+   static get inputPriority() { return 10; }
+   /** @type {number} Gets the amount of input event groups used by this component. */
+   static get inputEventGroups() { return 3; }
 
    get layoutTypes() { return this.#layoutTypes; }
    set layoutTypes(value) { 
@@ -87,9 +92,9 @@ export class VistavaView extends PresenterView {
    constructor() {
       super(VistavaPresenter, true);
 
-      this.#inputManager.registerInputEventGroup(TileGridControlsView, 2);
-      this.#inputManager.registerInputEventGroup(TileView, 3);
-      this.#inputManager.registerInputEventGroup(TileGridView, 4);
+      this.#inputManager.registerInputEventGroup(TileGridControlsView, VistavaView.inputPriority);
+      this.#inputManager.registerInputEventGroup(TileView, VistavaView.inputPriority + 1);
+      this.#inputManager.registerInputEventGroup(TileGridView, VistavaView.inputPriority + 2);
 
       this.onPresenterChanged.subscribe(this.#handleOnPresenterChanged);      
    } 
