@@ -73,7 +73,7 @@ export class VistavaView extends PresenterView {
    /** @type {TileGridControlsView?} */
    #gridControlsView = null;
    /** @type {InputManager} */
-   #inputManager = new InputManager();
+   #inputManager = InputManager.default;
 
    /** @type {ClassType<TileView>?} */
    #tileViewType = null;
