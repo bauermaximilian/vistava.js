@@ -189,15 +189,15 @@
    inkscape:pagecheckerboard="0"
    inkscape:deskcolor="#1e1e1e"
    showgrid="true"
-   inkscape:zoom="4.1760524"
-   inkscape:cx="18.677927"
-   inkscape:cy="43.462099"
+   inkscape:zoom="8.3521048"
+   inkscape:cx="47.772389"
+   inkscape:cy="59.086902"
    inkscape:window-width="1920"
    inkscape:window-height="1004"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
-   inkscape:current-layer="extension"
+   inkscape:current-layer="documentation"
    showguides="true"><inkscape:grid
      id="grid1"
      units="px"
@@ -1264,7 +1264,7 @@
 	<polygon
    class="icon"
    style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10"
-   points="74,13 74,87 50,65.62 26,87 26,13 "
+   points="50,65.62 26,87 26,13 74,13 74,87 "
    id="polygon380" />
 </g><g
    id="extension"
@@ -1278,7 +1278,29 @@
    d="M 15,45 V 25 h 20 c 0,0 1.426765,-10 10,-10 8.573236,0 10,10 10,10 h 20 v 20 c 0,0 10,1.426765 10,10 0,8.573235 -10,10 -10,10 V 85 H 55 C 55,85 52.769494,75 45,75 37.230505,75 35,85 35,85 H 15 V 65 C 15,65 25,64.411347 25,55 25,45.708383 15,45 15,45 Z"
    id="path33"
    class="icon"
-   sodipodi:nodetypes="cccscccscccscccsc" /></g>
+   sodipodi:nodetypes="cccscccscccscccsc" /></g><g
+   id="documentation"
+   style="display:none"
+   inkscape:groupmode="layer"
+   class="layer"
+   inkscape:label="documentation">
+	
+<path
+   style="display:inline;fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+   d="M 50,67 V 48"
+   id="path46"
+   class="icon"
+   sodipodi:nodetypes="cc" /><path
+   style="display:inline;fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+   d="m 50,35 v 0"
+   id="path47"
+   class="icon"
+   sodipodi:nodetypes="cc" /><path
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+   d="m 16,20 c 0,0 9,-5 19,-5 10,0 15,5 15,5 0,0 5,-5 15,-5 10,0 18,5 18,5 v 65 c 0,0 -8,-5 -18,-5 -10,0 -15,5 -15,5 0,0 -5,-5 -15,-5 -10,0 -19,5 -19,5 z"
+   id="path43"
+   class="icon"
+   sodipodi:nodetypes="cscsccscscc" /></g>
 <g
    id="loading"
    style="display:none"
