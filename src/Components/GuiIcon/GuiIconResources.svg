@@ -189,15 +189,15 @@
    inkscape:pagecheckerboard="0"
    inkscape:deskcolor="#1e1e1e"
    showgrid="true"
-   inkscape:zoom="8.3521048"
-   inkscape:cx="47.772389"
-   inkscape:cy="59.086902"
+   inkscape:zoom="4.1760524"
+   inkscape:cx="42.145065"
+   inkscape:cy="51.603759"
    inkscape:window-width="1920"
    inkscape:window-height="1004"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
-   inkscape:current-layer="documentation"
+   inkscape:current-layer="loop"
    showguides="true"><inkscape:grid
      id="grid1"
      units="px"
@@ -770,7 +770,52 @@
    d="M 60.239461,29.042158 76.676224,29.281618 75,12.394606"
    id="path29"
    sodipodi:nodetypes="ccc"
-   class="icon" /></g>
+   class="icon" /></g><g
+   id="loop"
+   style="display:none"
+   inkscape:groupmode="layer"
+   class="layer"
+   inkscape:label="loop">
+	
+	
+	
+	
+<path
+   id="path44"
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+   d="M 19.929602,64.022157 C 11.455905,46.648498 18.670747,25.695074 36.044405,17.221374 53.418061,8.7476746 74.371487,15.962515 82.845188,33.336175 c 8.473697,17.373657 1.258854,38.327081 -16.114803,46.800784 -8.686826,4.236848 -18.268599,4.551562 -26.737877,1.635357"
+   sodipodi:nodetypes="csssc"
+   class="icon" /><path
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+   d="m 51.371542,72.004636 -14.878236,6.990172 8.909358,14.44314"
+   id="path45"
+   sodipodi:nodetypes="ccc"
+   class="icon" /></g><g
+   id="loopDisable"
+   style="display:none"
+   inkscape:groupmode="layer"
+   class="layer"
+   inkscape:label="loopDisable">
+	
+	
+	
+	
+<path
+   id="path49"
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+   d="M 19.929602,64.022157 C 11.455905,46.648498 18.670747,25.695074 36.044405,17.221374 53.418061,8.7476746 74.371487,15.962515 82.845188,33.336175 c 8.473697,17.373657 1.258854,38.327081 -16.114803,46.800784 -8.686826,4.236848 -18.268599,4.551562 -26.737877,1.635357"
+   sodipodi:nodetypes="csssc"
+   class="icon" /><path
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+   d="m 51.371542,72.004636 -14.878236,6.990172 8.909358,14.44314"
+   id="path50"
+   sodipodi:nodetypes="ccc"
+   class="icon" /><path
+   style="fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"
+   d="M 15,85 85,15"
+   id="path51"
+   class="icon"
+   sodipodi:nodetypes="cc" /></g>
 <g
    id="maximize"
    style="display:none"
