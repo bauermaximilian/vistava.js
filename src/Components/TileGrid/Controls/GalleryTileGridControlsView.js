@@ -299,6 +299,10 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 				this.#progressPlayback.style.visibility = "hidden";
 			}
 		}
+
+		if (this.#videoController.hasEnded && !this.#videoController.loop) {
+			this.tileGridView?.presenter?.focusMoveHorizontal(1);			
+		}
 	}
 	
 	/**
@@ -516,7 +520,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 			} else if (args.action === "toggleMute") {
 				this.#videoController.toggleMute();
 			} else if (args.action === "left" && this.#videoController.shouldBePlaying) {
-				this.#videoController.seekBy(-10);
+				args.noFurtherAction = this.#videoController.seekBy(-10);
 				this.#updateStatus("rewind");
 			} else if (args.action === "right" && this.#videoController.shouldBePlaying) {
 				this.#videoController.seekBy(10);
@@ -525,6 +529,9 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 				this.#videoController.changeVolume(0.2);
 			} else if (args.action === "down") {
 				this.#videoController.changeVolume(-0.2); 
+			} else if (args.action === "toggleLoop") {
+				this.#videoController.loop = !this.#videoController.loop;
+				this.#updateStatus(this.#videoController.loop ? "loop" : "loopDisable");
 			} else {
 				args.noFurtherAction = false;
 			} 

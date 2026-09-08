@@ -23,6 +23,8 @@ export class VideoController {
    /** @type {boolean} */
    static #initalLoop = true;
    /** @type {boolean} */
+   static #reverseSeekRolloverOnLoop = false;
+   /** @type {boolean} */
    static #appliedGlobalConfiguration = false;
 
    get onUpdateVolume() { return this.#onUpdateVolume.event; }
@@ -182,6 +184,8 @@ export class VideoController {
             GlobalConfiguration.tileGridSettings.gallerySettings.muteVideosByDefault;
          VideoController.#initalLoop =
             GlobalConfiguration.tileGridSettings.gallerySettings.loopVideos;
+         VideoController.#reverseSeekRolloverOnLoop =
+            GlobalConfiguration.tileGridSettings.gallerySettings.reverseSeekRolloverOnLoop;
          VideoController.#appliedGlobalConfiguration = true;
       }
    }
@@ -240,13 +244,29 @@ export class VideoController {
 
    /**
     * @param {number} timeDelta The time difference (in seconds).
+    * @returns {boolean} True if at least 95% of the seek request could be completed, false otherwise.
     */
    seekBy(timeDelta) {
-      if (this.#videoElement !== null) {
+      if (this.#videoElement !== null && Math.abs(timeDelta) > 0) {
          let targetTime = this.#videoElement.currentTime + timeDelta;
-         if (this.#videoElement.currentTime !== targetTime) {
-            this.#videoElement.currentTime = targetTime;
+         let clampedTargetTime = Math.max(0, targetTime);
+         let remainingTimeDelta = targetTime - clampedTargetTime;
+         if (this.#videoElement.currentTime !== clampedTargetTime) {
+            this.#videoElement.currentTime = clampedTargetTime;
          }
+
+         if (this.loop && remainingTimeDelta < 0) {
+            if (VideoController.#reverseSeekRolloverOnLoop) {
+               let rolloverTargetTime = this.durationSeconds + remainingTimeDelta;
+               this.#videoElement.currentTime = Math.max(0, rolloverTargetTime);
+            }
+            return true;
+         } else {
+            let seekedAmount = 1 - (remainingTimeDelta / timeDelta);
+            return seekedAmount > 0.05;
+         }
+      } else {
+         return false;
       }
    }
 
@@ -268,7 +288,6 @@ export class VideoController {
    };
    
    #handleEnded = () => {
-      this.#initialPlaying = false;
       this.#onUpdatePlaybackState.trigger();
    };
 }
