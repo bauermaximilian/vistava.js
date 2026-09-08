@@ -309,20 +309,16 @@ export class TileGridLayoutColumn {
 
    /**
     * @param {number} offset 
-    * @param {number} [startPositionMinimum] 
-    * @param {number} [endPositionMaximum] 
+    * @param {number} [startPositionMaximum] 
     * @returns {number} The amount of the offset that was "clipped away" from the offset.
-    * Can be positive or negative, depending on the clipping direction.
     */
-   move(offset, startPositionMinimum, endPositionMaximum) {
+   move(offset, startPositionMaximum) {
       let offsetClipping = 0;
-      if (this.#startPosition !== null && startPositionMinimum != null) {
-         offsetClipping = Math.max(0, this.#startPosition + offset + startPositionMinimum);
+      if (this.#startPosition !== null && startPositionMaximum != null && offset > 0) {
+         let offsetMaximum = Math.max(0, startPositionMaximum - this.#startPosition);
+         offsetClipping = Math.max(0, offset - offsetMaximum);
+         offset -= offsetClipping;
       }
-      if (this.#endPosition !== null && endPositionMaximum != null) {
-         offsetClipping = Math.min(0, this.#endPosition - offset - endPositionMaximum);
-      }
-      offset -= offsetClipping;
 
       let offsetVector = TileFlowType.calculateVector(offset, this.#tileFlow);
       for (let i = 0; i < this.#items.length; i++) {
@@ -396,7 +392,7 @@ export class TileGridLayoutColumn {
     * @param {Rectangle} bounds 
     * @returns {TileGridLayoutItem?}
     */
-   getClosestTo(/** @type {any} */ tilePositionStartOrBounds, /** @type {any} */ tileLength) {
+   getClosestTo(tilePositionStartOrBounds, tileLength) {
       if (RU.isRectangle(tilePositionStartOrBounds)) {
          tileLength = TileFlowType.calculateScalar(RU.size(tilePositionStartOrBounds), this.#tileFlow);
          tilePositionStartOrBounds = TileFlowType.calculateScalar(RU.position(tilePositionStartOrBounds),

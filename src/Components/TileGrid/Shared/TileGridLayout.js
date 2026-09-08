@@ -281,11 +281,11 @@ export class TileGridLayout extends TileGridLayoutBase {
 	get firstNonEmptyColumn() { return this.#firstNonEmptyColumn; }
 	get lastNonEmptyColumn() { return this.#lastNonEmptyColumn; }
 	get size() { return this.#size; }
-	get hasDisbalancedStartRow() {
-		return this.#indexMinimum === 0 &&
-			this.#startPosition !== null && this.#startPositionMaximum !== null &&
-			Math.abs(this.#startPositionMaximum - this.#startPosition) > 1;
-	}
+	/** 
+	 * Gets a value that indicates whether the first row is completely populated with the first tiles
+	 * of the grid and all columns have the same starting position (true); false otherwise.
+	 */
+	get startRowIsNormalized() { return this.#startRowIsNormalized; }
 
 	/** @typedef {import("../../../Utils/RectangleUtils.js").Rectangle} Rectangle */
 	/** @typedef {import("../../../Utils/VectorUtils.js").Vector} Vector */
@@ -349,6 +349,8 @@ export class TileGridLayout extends TileGridLayoutBase {
 	#indexMinimum = null;
 	/** @type {number?} */
 	#indexMaximum = null;
+	/** @type {boolean} */
+	#startRowIsNormalized = true;
 
 	/**
 	 * @param {TileGridLayoutType} layoutType
@@ -483,16 +485,18 @@ export class TileGridLayout extends TileGridLayoutBase {
 
 	/**
 	 * @param {number} offset 
-	 * @param {number} [startPositionMinimum] 
-	 * @param {number} [endPositionMaximum] 
 	 * @returns {boolean} True if the layout (and all columns) were moved equally by the 
-	 * full {@link offset}, false otherwise.
+	 * full {@link offset} (which may happen when {@link normalizeStartRow} is true and the first
+	 * row is not normalized); false otherwise.
 	 */
-	move(offset, startPositionMinimum, endPositionMaximum) {
+	move(offset, normalizeStartRow = true) {
 		let clampedMinimum = 0, clampedMaximum = 0;
+
 		for (let column of this.#columns) {
+			let hasFinalStartTile = column.first != null && (column.first.index / this.#columns.length) < 1;
 			let clampedColumnMovementOffset =
-				column.move(offset, startPositionMinimum, endPositionMaximum);
+				column.move(offset, (!this.startRowIsNormalized && hasFinalStartTile && normalizeStartRow) ? 
+					this.#layoutType.paddingStart : undefined);
 			clampedMaximum = Math.max(clampedMaximum, clampedColumnMovementOffset);   
 			clampedMinimum = Math.min(clampedMinimum, clampedColumnMovementOffset);    
 		}
@@ -1066,6 +1070,7 @@ export class TileGridLayout extends TileGridLayoutBase {
 		this.#tilesCount = 0;
 		this.#firstNonEmptyColumn = null;
 		this.#lastNonEmptyColumn = null;
+		this.#startRowIsNormalized = true;
 
 		for (let i = 0; i < this.#columns.length; i++) {
 			let column = this.#columns[i];
@@ -1109,7 +1114,7 @@ export class TileGridLayout extends TileGridLayoutBase {
 				if (this.#endPosition === null || endPosition > this.#endPosition) {
 					this.#endPosition = endPosition;
 				}
-			}         
+			}
 		}
 
 		if (this.#columnWithTileIndexMinimum === null && this.#columns.length > 0) {
@@ -1117,6 +1122,11 @@ export class TileGridLayout extends TileGridLayoutBase {
 		}
 		if (this.#columnWithTileIndexMaximum === null && this.#columns.length > 0) {
 			this.#columnWithTileIndexMaximum = 0;
+		}
+
+		if (this.#startPosition !== null && this.#startPositionMaximum !== null) {
+			this.#startRowIsNormalized = Math.abs(this.#startPosition - this.#startPositionMaximum) <=
+				TileGridLayout.screenEpsilon;
 		}
 	}
 
