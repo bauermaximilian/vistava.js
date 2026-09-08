@@ -160,7 +160,12 @@ export class DialogView extends InteractivePresenterView {
             e.name = "userInput";
          }, (e, s) => {
             e.value = "";
-            s.display = this.#currentRequest?.hasTextInput === true ? "block" : "none";
+            if (this.#currentRequest?.hasTextInput === true) {
+               s.display = "block";
+               e.focus();
+            } else {
+               s.display = "none";
+            }
       });
       
       let buttonsCount = (this.#currentRequest?.buttons?.length ?? 0);
