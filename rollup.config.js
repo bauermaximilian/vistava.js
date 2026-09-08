@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { removePrivateJsdocImports, getAllModules, copyAsset, removeMatches } from "./rollup.plugins.js";
+import json from '@rollup/plugin-json';
 
 export default [
 	{
 		input: `./src/**/*`,
 		plugins: [
+			//@ts-ignore
+			json(),
 			removePrivateJsdocImports(),
 			removeMatches(/^\/\/\sSPDX-License-Identifier:\s.*$\n*/gm),
 			getAllModules(),

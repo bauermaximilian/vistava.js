@@ -15,6 +15,7 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
     "rollup": "^4.46.2"
   }
 }
