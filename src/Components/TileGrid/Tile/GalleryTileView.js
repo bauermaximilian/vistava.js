@@ -814,12 +814,13 @@ class GalleryTileViewMovementController {
    /** @type {EventHandler<DoubleClickEventArgs>} */
    #handleOnDoubleClick = (args) => {
       if (this.#hasFocus && !args.noFurtherAction) {
-         if (args.inputDeviceType === InputDeviceTypes.touch || (args.inputDeviceType === InputDeviceTypes.mouse &&
-            !GlobalConfiguration.tileGridSettings.gallerySettings.doubleClickZooms)) {
+         if (args.inputDeviceType === InputDeviceTypes.mouse &&
+            !GlobalConfiguration.tileGridSettings.gallerySettings.doubleClickZooms) {
             BrowserUtils.toggleFullscreen();
          } else {
             this.toggleNextScaleStep();
          }
+         args.noFurtherAction = true;
       }
    };
 
