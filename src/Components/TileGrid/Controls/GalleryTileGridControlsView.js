@@ -469,7 +469,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 	};
 
 	#handleOnMouseMoved = (/** @type {MouseEvent} */ e) => {
-		if (e.clientX < 50 || e.clientX > (window.screen.width - 50)) {
+		if (e.clientX < 50 || e.clientX > (window.innerWidth - 50)) {
 			this.#makePreviousNextVisibleLimiter.executeThrottled(this.#makePreviousNextVisible);
 		}
 	};
