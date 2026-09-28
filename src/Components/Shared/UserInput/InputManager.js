@@ -23,7 +23,8 @@ import { InputDeviceTypes } from "./InputDeviceType.js";
  */
 
 export class InputManager {
-   static #default = new InputManager();
+   /** @type {InputManager?} */
+   static #default = null;
 
    /** @type {KeyboardInputManager} */
    #keyboard = new KeyboardInputManager();
@@ -69,7 +70,12 @@ export class InputManager {
    /** @typedef {import("./InputEventsGroupController.js").ActionEventArgs} ActionEventArgs */
 
    /** @type {InputManager} Gets the default {@link InputManager} instance. */
-   static get default() { return InputManager.#default; }
+   static get default() {
+      if (this.#default === null) {
+         this.#default = new InputManager();
+      }
+      return this.#default;
+   }
 
    /** @type {boolean} */
    get isAttached() { return this.#targetElement !== null; }
