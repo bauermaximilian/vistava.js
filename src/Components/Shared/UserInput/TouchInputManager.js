@@ -9,7 +9,7 @@ export class TouchInputManagerSettings {
    /** @type {number} */
    #doubleTapTresholdMs = 400;
    /** @type {number} */
-   #dragStartTresholdDistance = 5;
+   #dragStartTresholdDistance = 15;
    /** @type {number} */
    #pinchStartTresholdFactorDifference = 0.001;
    /** @type {number} */
