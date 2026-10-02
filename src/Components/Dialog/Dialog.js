@@ -18,8 +18,8 @@ export class Dialog {
     * @returns {Promise<DialogResponseModel>}
     */
    static async showInputDialogAsync(description, title, buttons) {
-      this.#render();
-      return await this.#dialogPresenter.showInputDialogAsync(description, title, buttons);
+      Dialog.#render();
+      return await Dialog.#dialogPresenter.showInputDialogAsync(description, title, buttons);
    }
 
    /**
@@ -29,8 +29,8 @@ export class Dialog {
     * @returns {Promise<DialogResponseModel>}
     */
    static async showInfoAsync(description, title, buttons) {
-      this.#render();
-      return await this.#dialogPresenter.showInfoAsync(description, title, buttons);
+      Dialog.#render();
+      return await Dialog.#dialogPresenter.showInfoAsync(description, title, buttons);
    }
 
    /**
@@ -40,15 +40,15 @@ export class Dialog {
     * @returns {Promise<DialogResponseModel>}
     */
    static async showErrorAsync(description, title, buttons) {
-      this.#render();
-      return await this.#dialogPresenter.showErrorAsync(description, title, buttons);
+      Dialog.#render();
+      return await Dialog.#dialogPresenter.showErrorAsync(description, title, buttons);
    }
 
    static #render() {
-      this.#dialogView = cu(this.#dialogView, DialogView, document.body, (e, s) => {
+      Dialog.#dialogView = cu(Dialog.#dialogView, DialogView, document.body, (e, s) => {
          InputManager.default.registerInputEventGroup(DialogView, 1);
          e.inputManager = InputManager.default;
-         e.presenter = this.#dialogPresenter;
+         e.presenter = Dialog.#dialogPresenter;
       });
    }
 }
