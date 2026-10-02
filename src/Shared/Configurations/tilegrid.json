@@ -1,7 +1,7 @@
 {
    "thumbnails": {
       "showVideoLabels": true,
-      "showImageLabels": true
+      "showImageLabels": false
    },
    "gallery": {
       "muteVideosByDefault": false,
