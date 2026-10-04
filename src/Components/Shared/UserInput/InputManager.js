@@ -384,7 +384,7 @@ export class InputManager {
    };
 
    /**
-    * @param {{sender:any, position:Vector, factor:number, smoothingHint:boolean, target?: EventTarget?}} args 
+    * @param {{sender:any, position:Vector, factor:Vector, smoothingHint:boolean, target?: EventTarget?}} args 
     */
    #handleOnScroll = (args) => {
       let noFurtherAction = false;

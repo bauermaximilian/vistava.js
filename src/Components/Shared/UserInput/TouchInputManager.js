@@ -79,7 +79,7 @@ export class TouchInputManager {
    #onDragEnd = new EventController();
    /** @readonly @type {EventController<{sender: TouchInputManager, target:EventTarget?}>} */
    #onPinchStart = new EventController();
-   /** @readonly @type {EventController<{sender: TouchInputManager, position:Vector, factor:number, smoothingHint:boolean}>} */
+   /** @readonly @type {EventController<{sender: TouchInputManager, position:Vector, factor:Vector, smoothingHint:boolean}>} */
    #onPinch = new EventController();
    /** @readonly @type {EventController<{sender: TouchInputManager}>} */
    #onPinchEnd = new EventController();
@@ -253,7 +253,7 @@ export class TouchInputManager {
                this.#onPinch.trigger({
                   sender: this,
                   position: this.#primaryStart.position, 
-                  factor: pinchFactor,
+                  factor: V.new(0, pinchFactor),
                   smoothingHint: false
                });
             }

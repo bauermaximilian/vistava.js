@@ -49,7 +49,7 @@ export class GamepadInputManager {
    #onMoveEnd = new EventController();
    /** @readonly @type {EventController<{sender: GamepadInputManager, target:EventTarget?}>} */
    #onScrollStart = new EventController();
-   /** @readonly @type {EventController<{sender: GamepadInputManager, position:Vector, factor:number, smoothingHint:boolean, target:EventTarget?}>} */
+   /** @readonly @type {EventController<{sender: GamepadInputManager, position:Vector, factor:Vector, smoothingHint:boolean, target:EventTarget?}>} */
    #onScroll = new EventController();
    /** @readonly @type {EventController<{sender: GamepadInputManager}>} */
    #onScrollEnd = new EventController();
@@ -300,7 +300,7 @@ export class GamepadInputManager {
          this.#onScroll.trigger({ 
             sender: this, 
             position: boundsCenter,
-            factor: scrollFactor,
+            factor: V.new(0, scrollFactor),
             target: null,
             smoothingHint: true
          });

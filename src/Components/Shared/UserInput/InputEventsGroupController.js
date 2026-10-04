@@ -76,7 +76,7 @@ import { InputManager } from "./InputManager.js";
 * @typedef {{
 *    inputDeviceType:InputDevice,
 *    position:Vector, 
-*    factor:number,
+*    factor:Vector,
 *    smoothingHint:boolean,
 *    noFurtherAction:boolean
 * }} ScrollEventArgs

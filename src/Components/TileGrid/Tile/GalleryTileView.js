@@ -754,20 +754,22 @@ class GalleryTileViewMovementController {
 
    /** @type {EventHandler<ScrollEventArgs>} */
    #handleOnScroll = (args) => {
-      if (this.#hasFocus && !args.noFurtherAction) {
-         args.noFurtherAction = true;
-         
+      if (this.#hasFocus && !args.noFurtherAction) {         
          let centerPosition = VU.add(this.#offset,
             VU.add(VU.scale(this.#containerSize ?? VU.new(0, 0), 0.5), this.#pointerInputOffset));
          let centerOffset = VU.sub(args.position, centerPosition);
-         let scaleDirection = VU.scale(centerOffset, 1 - args.factor);
+         let scaleDirection = VU.scale(centerOffset, 1 - args.factor.y);
          
          if (args.inputDeviceType === InputDeviceTypes.touch) {
-            this.#rawTouchPinchFactor = args.factor;
+            this.#rawTouchPinchFactor = args.factor.y;
             this.#movementInputAgent.addToCurrentValue(scaleDirection);
+            args.noFurtherAction = true;
          } else {
-            this.#zoomMomentumAgent.addCharge(this.#addZoomFactorToZoomInputAgent(args.factor));
-            this.#movementMomentumAgent.addToCurrentValue(scaleDirection);
+            if (Math.abs(1 - args.factor.y) > Math.abs(1 - args.factor.x)) {
+               this.#zoomMomentumAgent.addCharge(this.#addZoomFactorToZoomInputAgent(args.factor.y));
+               this.#movementMomentumAgent.addToCurrentValue(scaleDirection);
+               args.noFurtherAction = true;
+            }
          }
       }
    };

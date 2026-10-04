@@ -73,7 +73,7 @@ export class MouseInputManager {
    #onDragEnd = new EventController();
    /** @readonly @type {EventController<{sender: MouseInputManager, target:EventTarget?}>} */
    #onWheelStart = new EventController();
-   /** @readonly @type {EventController<{sender: MouseInputManager, position:Vector, factor:number, smoothingHint:boolean, target:EventTarget?}>} */
+   /** @readonly @type {EventController<{sender: MouseInputManager, position:Vector, factor:Vector, smoothingHint:boolean, target:EventTarget?}>} */
    #onWheel = new EventController();
    /** @readonly @type {EventController<{sender: MouseInputManager}>} */
    #onWheelEnd = new EventController();
@@ -320,9 +320,12 @@ export class MouseInputManager {
             target: event.target
          });
       }
+
+      let eventPosition = VU.isZero(this.#positionCurrent) ?
+         VU.new(event.clientX, event.clientY) : this.#positionCurrent;
       this.#onWheel.trigger({
          sender: this,
-         position: this.#positionCurrent,
+         position: eventPosition,
          factor: this.#getWheelDeltaFactor(event),
          target: event.target,
          smoothingHint: true
@@ -345,23 +348,39 @@ export class MouseInputManager {
 
    /**
     * @param {WheelEvent} event 
-    * @returns {number}
+    * @returns {Vector}
     */
    #getWheelDeltaFactor(event) {
       if (this.#targetElement) {
-         let maximum = event.deltaY < 0 ? (-1) : 1;
-         let factor;
-         if (event.deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
-            factor = 1 - (this.#settings.scrollSpeed * (event.deltaY / 
-               this.#targetElement.ownerDocument.documentElement.clientHeight));
-         } else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-            factor = (event.deltaY >= 0 ? 2 : 0.5) * this.#settings.scrollSpeed;
-         } else {
-            factor = maximum - (0.01 * this.#settings.scrollSpeed) * maximum;
-         }
-         return factor;
+         return VU.new(
+            this.#getWheelDeltaFactorComponent(event.deltaX, event.deltaMode,
+               this.#targetElement?.ownerDocument.documentElement.clientWidth),
+            this.#getWheelDeltaFactorComponent(event.deltaY, event.deltaMode,
+               this.#targetElement?.ownerDocument.documentElement.clientHeight)
+         )
       } else {
-         return 1;
+         return VU.new(1, 1);
       }
+   }
+
+   /**
+    * @param {number} eventDelta
+    * @param {number} eventDeltaMode
+    * @param {number} deltaDivisor 
+    * @returns {number}
+    */
+   #getWheelDeltaFactorComponent(eventDelta, eventDeltaMode, deltaDivisor) {
+      let factor;
+
+      let maximum = eventDelta < 0 ? (-1) : 1;
+      if (eventDeltaMode === WheelEvent.DOM_DELTA_PIXEL) {
+         factor = 1 - (this.#settings.scrollSpeed * (eventDelta / deltaDivisor));
+      } else if (eventDeltaMode === WheelEvent.DOM_DELTA_PAGE) {
+         factor = (eventDelta >= 0 ? 2 : 0.5) * this.#settings.scrollSpeed;
+      } else {
+         factor = maximum - (0.01 * this.#settings.scrollSpeed) * maximum;
+      }
+      
+      return factor;
    }
 }

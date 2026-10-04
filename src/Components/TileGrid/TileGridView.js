@@ -885,7 +885,9 @@ class TileGridViewMovementController {
    #handleOnScroll = (args) => {
       if (!args.noFurtherAction) {
          let gridLength = this.#tileGridViewProperties?.visibleLength ?? 0;
-         let scrollDistance = (gridLength * args.factor) - gridLength;
+         let tileFlowHorizontal = this.#tileGridViewProperties?.tileFlow === TileFlows.horizontal;
+         let scrollDistance =
+            (gridLength * (tileFlowHorizontal ? args.factor.x : args.factor.y)) - gridLength;
          this.#scrollInputOffsetAgent.addToCurrentValue(scrollDistance);
          this.#scrollInputOffsetMomentumAgent.addCharge(scrollDistance);
       }
