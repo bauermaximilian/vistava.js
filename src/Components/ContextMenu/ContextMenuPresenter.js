@@ -133,16 +133,32 @@ export class ContextMenuPresenter {
       Assert.numberInteger(offset, "offset");
 
       if (this.#entryPresenters.length > 0) {
+         let currentFocusEntryIndex = null;
          for (let i = 0; i < this.#entryPresenters.length; i++) {
             if (this.#entryPresenters[i].focussed) {
-               let entry = this.#entryPresenters[MathUtils.moduloUnsigned(i + offset, this.#entryPresenters.length)];
-               if (entry != null) {
-                  this.focusEntry(entry.model);
-               }
-               return;
+               currentFocusEntryIndex = i;
+               break;
             }
-         }      
-         this.focusEntry(this.#entryPresenters[(offset) % this.#entryPresenters.length].model);
+         }
+         if (currentFocusEntryIndex === null) {
+            currentFocusEntryIndex = 0;
+         }
+
+         let targetFocusEntryIndex = currentFocusEntryIndex;
+
+         for (let i = 0; i < this.#entryPresenters.length; i++) {
+            let fixOffset = offset >= 0 ? i : -i;
+            let targetFocusEntryIndexCandidate = MathUtils.moduloUnsigned(
+               currentFocusEntryIndex + offset + fixOffset, this.#entryPresenters.length);
+            
+            if (!this.#entryPresenters[targetFocusEntryIndexCandidate].isSeparator &&
+               !this.#entryPresenters[targetFocusEntryIndexCandidate].model.disabled) {
+               targetFocusEntryIndex = targetFocusEntryIndexCandidate;
+               break;
+            }
+         }
+
+         this.focusEntry(this.#entryPresenters[targetFocusEntryIndex].model);
       }
    }
 

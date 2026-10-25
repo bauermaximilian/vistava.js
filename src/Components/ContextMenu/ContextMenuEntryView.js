@@ -24,8 +24,6 @@ export class ContextMenuEntryView extends PresenterView {
    #elementLabel = null;
    /** @type {HTMLElement?} */
    #elementIcon = null;
-   /** @type {HTMLHRElement?} */
-   #elementSeparator = null;
    
    constructor() {
       super(ContextMenuEntryPresenter);
@@ -34,7 +32,6 @@ export class ContextMenuEntryView extends PresenterView {
          s.userSelect = "none";
          s.display = "flex";
          s.fontSize = "18px";
-         s.borderBottom = "1px solid #181818";
       });
 
       this.onPresenterChanged.subscribe(this.#handleOnPresenterChanged);
@@ -51,7 +48,6 @@ export class ContextMenuEntryView extends PresenterView {
       if (args.newValue !== null) {
          this.#updateIconElement();
          this.#updateLabelElement();
-         this.#updateSeparatorElement();
          this.#updateMainElement();
       }
    };
@@ -71,7 +67,6 @@ export class ContextMenuEntryView extends PresenterView {
       if (labelUpdated || iconUpdated || elementUpdated) {
          this.#updateIconElement();
          this.#updateLabelElement();
-         this.#updateSeparatorElement();
          this.#updateMainElement();
       }
    };
@@ -124,26 +119,15 @@ export class ContextMenuEntryView extends PresenterView {
       }
    }
 
-   #updateSeparatorElement() {
-      if (this.presenter?.isSeparator) {
-         this.#elementSeparator = cu(this.#elementSeparator, HTMLHRElement, this.#element, (e, s) => {
-            s.width = "100%";
-            s.border = "1pt solid black";
-            s.margin = "0";
-         });
-      } else {
-         this.#elementSeparator?.remove();
-         this.#elementSeparator = null;
-      }
-   }
-
    #updateMainElement() {
       const disabledPointerStyle = "initial";
       const enabledPointerStyle = "pointer";
       const disabledLabelOpacity = "50%";
       const enabledLabelOpacity = "100%";
       const normalStylePadding = "0.5em 1.75em 0.5em 0.5em";
-      const separatorStylePadding = "0.25em 0.25em 0.25em 0.25em";
+      const normalStyleBorderBottom = "1px solid #181818"
+      const separatorStylePadding = "0";
+      const separatorStyleBorderBottom = "2px solid rgb(183,183,183)";
       const normalBackgroundColor = "initial";
       const focussedBackgroundColor = "#2b2b2b";
       const isDisabledNotSeparator = this.presenter?.isSeparator && this.presenter?.model.disabled === true;
@@ -158,5 +142,7 @@ export class ContextMenuEntryView extends PresenterView {
          separatorStylePadding : normalStylePadding;
       this.#element.style.backgroundColor = this.presenter?.focussed ?
          focussedBackgroundColor : normalBackgroundColor;
+      this.#element.style.borderBottom = this.presenter?.isSeparator ?
+         separatorStyleBorderBottom : normalStyleBorderBottom;
    }
 }
