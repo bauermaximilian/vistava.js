@@ -8,6 +8,8 @@ import { Source } from "./Source.js";
  * Provides an abstract base class for sources that provide content "page by page".
  * @abstract Must override the {@link createContentRetriever} method. May override the 
  * {@link name} property getter.
+ * @template {import("./Source.js").SourceConfiguration} TConfig
+ * @extends {Source<TConfig>}
  */
 export class SourceSegmented extends Source {
    /**
