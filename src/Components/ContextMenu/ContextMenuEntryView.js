@@ -127,7 +127,7 @@ export class ContextMenuEntryView extends PresenterView {
       const normalStylePadding = "0.5em 1.75em 0.5em 0.5em";
       const normalStyleBorderBottom = "1px solid #181818"
       const separatorStylePadding = "0";
-      const separatorStyleBorderBottom = "2px solid rgb(183,183,183)";
+      const separatorStyleBorderTop = "2px solid #1e1e1e";
       const normalBackgroundColor = "initial";
       const focussedBackgroundColor = "#2b2b2b";
       const isDisabledNotSeparator = this.presenter?.isSeparator && this.presenter?.model.disabled === true;
@@ -142,7 +142,8 @@ export class ContextMenuEntryView extends PresenterView {
          separatorStylePadding : normalStylePadding;
       this.#element.style.backgroundColor = this.presenter?.focussed ?
          focussedBackgroundColor : normalBackgroundColor;
-      this.#element.style.borderBottom = this.presenter?.isSeparator ?
-         separatorStyleBorderBottom : normalStyleBorderBottom;
+      this.#element.style.borderTop = this.presenter?.isSeparator ?
+         separatorStyleBorderTop : "";
+      this.#element.style.borderBottom = normalStyleBorderBottom;
    }
 }
