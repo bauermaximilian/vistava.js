@@ -5,6 +5,7 @@ import { ArgumentError } from "../Errors/ArgumentError.js";
 import { ImplementationError } from "../Errors/ImplementationError.js";
 import { InvalidOperationError } from "../Errors/InvalidOperationError.js";
 import { NotSupportedError } from "../Errors/NotSupportedError.js";
+import { NotFoundError } from "../Errors/NotFoundError.js";
 
 const standardElementTypeTagNames = Object.freeze({
 	HTMLAnchorElement: "a",
@@ -406,7 +407,7 @@ export class BrowserUtils {
 	/**
 	 * @param {string} url 
 	 * @param {(configObject:object)=>void} callback 
-	 * @returns {Promise<void>}
+	 * @returns {Promise<NotFoundError|InvalidOperationError|null>}
 	 */
 	static async tryLoadConfiguration(url, callback) {
 		let configText = await BrowserUtils.tryFetchText(url);
@@ -416,14 +417,17 @@ export class BrowserUtils {
 				if (configObject != null) {
 					callback(configObject);
 					console.info(`Loaded user configuration from "${url}".`);
+					return null;
 				} else {
-					console.info(`No user configuration found at "${url}" - using default configuration instead.`);
+					return new NotFoundError(
+						`No user configuration found at "${url}" - using default configuration instead.`);
 				}
 			} catch (error) {
-				console.error(`User configuration from "${url}" couldn't be loaded. ${error}`);
+				return new InvalidOperationError(`User configuration from "${url}" couldn't be loaded. ${error}`);
 			}
 		} else {
-			console.info(`No user configuration found at "${url}" - using default configuration instead.`);
+			return new NotFoundError(
+				`No user configuration found at "${url}" - using default configuration instead.`);
 		}
 	}
 
