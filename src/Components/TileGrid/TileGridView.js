@@ -740,28 +740,33 @@ class TileGridViewMovementController {
       this.#agents.update(deltaTime);
       this.#movementInputOffsetMomentumAgent.attenuateCharge(deltaTime, 4.2);
 
-      // Prevent scrolling from interfering with the position guard.
-      let positionGuardOverrideRatio = 
-         1 - Math.max(Math.min(Math.abs(this.#positionGuardAgent.currentValue) / 5, 1), 0);
+      // Prevent scrolling from overruling the position guard (but only if the scrolling would be 
+      // oppositional to the position guard movement to avoid locking scrolling completely)
+      let positionGuardOverrideRatio = 1;
+      if ((this.#positionGuardAgent.currentValue < 0 && this.#scrollInputOffsetAgent.lastStep > 0) ||
+         (this.#positionGuardAgent.currentValue > 0 && this.#scrollInputOffsetAgent.lastStep < 0)) {
+         positionGuardOverrideRatio = 
+            1 - Math.max(Math.min(Math.abs(this.#positionGuardAgent.currentValue) / 5, 1), 0);
+      }
       let insideBoundsRatio = 1 - this.#calculateOutOfBoundsRatio();
    
       let contentCompletelyOutOfBounds = insideBoundsRatio < 0.01;
       let contentPartlyOutOfBounds = insideBoundsRatio < 1;
 
-      if (contentPartlyOutOfBounds) {
-         this.#movementInputOffsetMomentumAgent.stopAtTarget();
-         this.#scrollInputOffsetMomentumAgent.stopAtTarget();
-      }
-      if (contentCompletelyOutOfBounds) {
-         this.triggerPositionGuard();
-      }
-
       let offsetUser = this.#movementInputOffsetAgent.lastStep +
          this.#scrollInputOffsetAgent.lastStep * positionGuardOverrideRatio +
          this.#movementInputOffsetMomentumAgent.lastStep +
          this.#scrollInputOffsetMomentumAgent.lastStep;
-      let offsetInternal = this.#positionGuardAgent.lastStep +
-      this.#focussedTileOffsetAgent.lastStep;
+
+      if (contentPartlyOutOfBounds) {
+         this.#movementInputOffsetMomentumAgent.stopAtTarget();
+         this.#scrollInputOffsetMomentumAgent.stopAtTarget();
+      }
+      if (contentCompletelyOutOfBounds || (contentPartlyOutOfBounds && Math.abs(offsetUser) < 0.01)) {
+         this.triggerPositionGuard();
+      }
+
+      let offsetInternal = this.#positionGuardAgent.lastStep + this.#focussedTileOffsetAgent.lastStep;
       
       // The farther the user tries to move the content out of bounds (or when the position guard 
       // is active), the more all movement besides the position guard is attenuated.
@@ -799,10 +804,6 @@ class TileGridViewMovementController {
       }
    }
 
-   /**
-    * Trigger on:
-    * - handleOnExpandAndTrimChangedToIdleInitially
-    */
    triggerPositionGuard() {
       if (this.#tileGridViewProperties === null) {
          throw new InvalidOperationError();
@@ -883,7 +884,7 @@ class TileGridViewMovementController {
 
    /** @type {EventHandler<ScrollEventArgs>} */
    #handleOnScroll = (args) => {
-      if (!args.noFurtherAction) {
+      if (!args.noFurtherAction && this.#scrollInputOffsetMomentumAgent.isCharging) {
          let gridLength = this.#tileGridViewProperties?.visibleLength ?? 0;
          let tileFlowHorizontal = this.#tileGridViewProperties?.tileFlow === TileFlows.horizontal;
          let scrollDistance =
@@ -906,32 +907,32 @@ class TileGridViewMovementController {
    #handleOnMoveStart = (args) => {
       if (args.inputDeviceType !== InputDeviceTypes.mouse || this.#handleMouseAsTouch) {
          this.#movementInputOffsetMomentumAgent.startCharging();
-         this.#movementAsScrollInputOffsetMomentumAgent.startCharging();
-      }
+         this.#movementAsScrollInputOffsetMomentumAgent.startCharging();      
 
-      this.#recentMovementAsOrthogonalPull = 0;
-      this.#recentMovementAsScroll = 0;
+         this.#recentMovementAsOrthogonalPull = 0;
+         this.#recentMovementAsScroll = 0;
       
-      // Some Android phone users have the "back" functionality mapped to swiping from the left/right screen corner
-      // to the middle, and other system-related gestures mapped to swiping from the top/bottom screen corner to the
-      // middle - to avoid visual glitches, movements that start very close to these corners are ignored.
-      const movementStartTolerance = 30;
-      if (args.position !== null && this.#tileGridViewProperties !== null) {
-         let tileFlowHorizontal = this.#tileGridViewProperties?.tileFlow === TileFlows.horizontal;
-         if (tileFlowHorizontal && (args.position.x < movementStartTolerance ||
-            args.position.x > (this.#tileGridViewProperties.visibleLength - movementStartTolerance))) {
-            this.#recentMovementAsScroll = null;
-         } else if (!tileFlowHorizontal && (args.position.y < movementStartTolerance ||
-            args.position.y > (this.#tileGridViewProperties.visibleLength - movementStartTolerance))) {
-            this.#recentMovementAsScroll = null;
+         // Some Android phone users have the "back" functionality mapped to swiping from the left/right screen corner
+         // to the middle, and other system-related gestures mapped to swiping from the top/bottom screen corner to the
+         // middle - to avoid visual glitches, movements that start very close to these corners are ignored.
+         const movementStartTolerance = 30;
+         if (args.position !== null && this.#tileGridViewProperties !== null) {
+            let tileFlowHorizontal = this.#tileGridViewProperties?.tileFlow === TileFlows.horizontal;
+            if (tileFlowHorizontal && (args.position.x < movementStartTolerance ||
+               args.position.x > (this.#tileGridViewProperties.visibleLength - movementStartTolerance))) {
+               this.#recentMovementAsScroll = null;
+            } else if (!tileFlowHorizontal && (args.position.y < movementStartTolerance ||
+               args.position.y > (this.#tileGridViewProperties.visibleLength - movementStartTolerance))) {
+               this.#recentMovementAsScroll = null;
+            }
          }
       }
    };
 
    /** @type {EventHandler<MoveEventArgs>} */
    #handleOnMove = (args) => {
-      if ((args.inputDeviceType !== InputDeviceTypes.mouse  || this.#handleMouseAsTouch) && 
-         !args.noFurtherAction) {
+      if ((args.inputDeviceType !== InputDeviceTypes.mouse || this.#handleMouseAsTouch) && 
+         !args.noFurtherAction && this.#movementInputOffsetMomentumAgent.isCharging) {
          let scrollDistance = null;
          let orthogonalPullDistance = null;
 
