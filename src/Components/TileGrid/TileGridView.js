@@ -18,6 +18,7 @@ import { TileFocuses } from "./Shared/TileFocusType.js";
 import { TileView } from "./Tile/TileView.js";
 import { TileGridPresenter } from "./TileGridPresenter.js";
 import { InputDeviceTypes } from "../Shared/UserInput/InputDeviceType.js";
+import { GlobalConfiguration } from "../../Shared/GlobalConfiguration.js";
 
 /**
  * @typedef {object} TileGridViewItemUpdatedEventArgs
@@ -315,7 +316,8 @@ export class TileGridView extends InteractivePresenterView {
          s.display = "block";
          s.position = "absolute";
          s.willChange = "transform, opacity";
-         s.transition = `opacity 0.5s ease-in-out`;
+         s.transition = GlobalConfiguration.tileGridSettings.generalSettings.reduceFadeInOut ?
+            "" : `opacity 0.3s ease-in-out`;
          
          e.presenter = presenter;
          e.inputManager = this.inputManager;
@@ -501,7 +503,11 @@ export class TileGridView extends InteractivePresenterView {
 
       if (args.currentFocusType === TileFocuses.visible && args.currentlyFocussedTileIndex !== null) {
          if (!this.presenter.layout.hasEmptyColumns) {
-            this.moveFocussedTileIntoVisibleArea();
+            let skipAnimation = ((this.presenter.layout.columnCount === 1 &&
+               GlobalConfiguration.tileGridSettings.generalSettings.reduceSingleColumnAnimations) ||
+               (this.presenter.layout.columnCount > 1 &&
+                  GlobalConfiguration.tileGridSettings.generalSettings.reduceMultiColumnAnimations));
+            this.moveFocussedTileIntoVisibleArea(skipAnimation);
          } else if (!this.#moveFocusIntoViewOnNextMount) {
             let focussedTileVisibility = this.presenter.layout.getTileVisibility(args.currentlyFocussedTileIndex);
             if (focussedTileVisibility !== null && focussedTileVisibility < 1) {

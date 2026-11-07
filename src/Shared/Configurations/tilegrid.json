@@ -9,5 +9,10 @@
       "zoomToTop": true,
       "doubleClickZooms": false,
       "reverseSeekRolloverOnLoop": false
+   },
+   "general": {
+      "reduceSingleColumnAnimations": true,
+      "reduceMultiColumnAnimations": false,
+      "reduceFadeInOut": false
    }
 }

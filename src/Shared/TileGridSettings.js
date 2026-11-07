@@ -4,9 +4,12 @@ import { PU } from "../Utils/ParseUtils.js";
 import { Assert } from "./Assert.js";
 
 export class TileGridSettings {   
+   get generalSettings() { return this.#generalSettings; }
    get thumbnailSettings() { return this.#thumbnailSettings; }   
    get gallerySettings() { return this.#gallerySettings; }
    
+   /** @type {GeneralSettings} */
+   #generalSettings = new GeneralSettings();
    /** @type {ThumbnailSettings} */
    #thumbnailSettings = new ThumbnailSettings();
    /** @type {GallerySettings} */
@@ -19,6 +22,18 @@ export class TileGridSettings {
     */
    static fromConfiguration(obj) {
       let settings = new TileGridSettings();
+
+      let generalConfig = PU.parseObject(obj, "general", g => ({
+         reduceSingleColumnAnimations: PU.parseBoolean(g, "reduceSingleColumnAnimations", null),
+         reduceMultiColumnAnimations: PU.parseBoolean(g, "reduceMultiColumnAnimations", null),
+         reduceFadeInOut: PU.parseBoolean(g, "reduceFadeInOut", null)
+      }));
+      settings.generalSettings.reduceSingleColumnAnimations = generalConfig.reduceSingleColumnAnimations ??
+         settings.generalSettings.reduceSingleColumnAnimations;
+      settings.generalSettings.reduceMultiColumnAnimations = generalConfig.reduceMultiColumnAnimations ??
+         settings.generalSettings.reduceMultiColumnAnimations;
+      settings.generalSettings.reduceFadeInOut = generalConfig.reduceFadeInOut ??
+         settings.generalSettings.reduceFadeInOut;
 
       let thumbnailsConfig = PU.parseObject(obj, "thumbnails", t => ({
          showVideoLabels: PU.parseBoolean(t, "showVideoLabels", null),
@@ -51,6 +66,31 @@ export class TileGridSettings {
       
       return settings;
    }
+}
+
+class GeneralSettings {   
+   get reduceSingleColumnAnimations() { return this.#reduceSingleColumnAnimations; }
+   set reduceSingleColumnAnimations(value) {
+      Assert.boolean(value, undefined, true);
+      this.#reduceSingleColumnAnimations = value;
+   }
+   get reduceMultiColumnAnimations() { return this.#reduceMultiColumnAnimations; }
+   set reduceMultiColumnAnimations(value) {
+      Assert.boolean(value, undefined, true);
+      this.#reduceMultiColumnAnimations = value;
+   }
+   get reduceFadeInOut() { return this.#reduceFadeInOut; }
+   set reduceFadeInOut(value) {
+      Assert.boolean(value, undefined, true);
+      this.#reduceFadeInOut = value;
+   }
+
+   /** @type {boolean} */
+   #reduceSingleColumnAnimations = true;
+   /** @type {boolean} */
+   #reduceMultiColumnAnimations = false;
+   /** @type {boolean} */
+   #reduceFadeInOut = false;
 }
 
 class ThumbnailSettings {   
