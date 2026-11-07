@@ -91,13 +91,15 @@ export class ThumbnailTileView extends TileView {
          s.boxSizing = "border-box";
          s.display = "block";
       };
-      /** @param {CSSStyleDeclaration} s @param {number} visibleFocusOpacity @param {number} invisibleFocusOpacity */
-      let updateSharedStyles = (s, visibleFocusOpacity, invisibleFocusOpacity) => {
+      /** @param {CSSStyleDeclaration} s @param {number} focusOpacity */
+      let updateSharedStyles = (s, focusOpacity) => {
          if (this.presenter === null) { return; }
-         let focusOpacity = hasFocus ? (
-            hasVisibleFocus ? visibleFocusOpacity : invisibleFocusOpacity) : 0;
-         let focusBlur = 12 * focusOpacity;
-         s.filter = `drop-shadow(0px 0px ${focusBlur}px rgba(216,216,216,${focusOpacity}))`;         
+         if (hasVisibleFocus) {
+            let focusBlur = 12 * focusOpacity;
+            s.filter = `drop-shadow(0px 0px ${focusBlur}px rgba(216,216,216,${focusOpacity}))`;
+         } else {
+            s.filter = "";
+         }
       };
 
       let disposeThumbnailElement = (/** @type {HTMLImageElement | GuiIconView | null} */ e) => {
@@ -121,7 +123,7 @@ export class ThumbnailTileView extends TileView {
                e.presenter.model.icon = GuiIconNames["collection"]
             }
          }, (e, s) => {            
-            updateSharedStyles(s, 1, 0.4);
+            updateSharedStyles(s, 1);
             s.color = hasFocus ? "#d8d8d8" : "#b7b7b7"
          }, disposeThumbnailElement, true);  
       } else if (thumbnailType?.startsWith("image") && thumbnailUrl !== null && !this.#loadingFailed) {
@@ -133,7 +135,7 @@ export class ThumbnailTileView extends TileView {
             s.width = "100%";
             s.objectFit = "cover";
          }, (e, s) => {
-            updateSharedStyles(s, 1, 0.4);
+            updateSharedStyles(s, 1);
          }, disposeThumbnailElement, true);
       } else {
          this.#insetLabel = true;
@@ -143,7 +145,7 @@ export class ThumbnailTileView extends TileView {
             e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
             e.presenter.model.icon = GuiIconNames["cross-box"];
          }, (e, s) => {            
-            updateSharedStyles(s, 1, 0.4);
+            updateSharedStyles(s, 1);
             s.color = hasFocus ? "#d8d8d8" : "#b7b7b7"
          }, disposeThumbnailElement, true);
       }
