@@ -324,7 +324,6 @@ export class TileGridView extends InteractivePresenterView {
          this.#onTileViewUpdated.trigger({ tileIndex, oldView: null, newView: e });
       }, (e, s) => {
          if (e.presenter?.contentSize != null && location != null) {            
-            s.opacity = "1";
             let visibility = this.presenter?.layout.getTileVisibility(tileIndex) ?? 0;
             if (visibility > 0) {
                s.visibility = "visible";
@@ -334,9 +333,13 @@ export class TileGridView extends InteractivePresenterView {
                   s.height = `${location.height.toFixed(1)}px`;
                   s.transform =
                      `translate(${location.x.toFixed(1)}px, ${location.y.toFixed(1)}px)`;
+                  s.opacity = "1";
+               } else {
+                  s.opacity = "0";
                }
             } else {
                s.visibility = "collapse";
+               s.opacity = "0";
             }
          } else {
             s.visibility = "collapse";

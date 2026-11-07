@@ -152,6 +152,7 @@ export class GalleryTileView extends TileView {
             s.opacity = "0";
          }, (e, s) => {
             s.transform = transform;
+            s.opacity = this.#movementController.zoomStepsInitialized ? "1" : "0";
          });
       } else if (mediaType.startsWith("video") && !this.#loadingFailed) {
          const mediaPreviewType = this.presenter?.model.getDataAsString(TileDataField.mediaPreviewType) ?? null;
@@ -238,7 +239,6 @@ export class GalleryTileView extends TileView {
       let mediaBounds;
       if (mediaElement instanceof HTMLImageElement) {
          mediaBounds = VU.new(mediaElement.naturalWidth, mediaElement.naturalHeight);
-         mediaElement.style.opacity = "1";
       } else if (mediaElement instanceof HTMLVideoElement) {
          mediaBounds = VU.new(mediaElement.videoWidth, mediaElement.videoHeight);
       } else if (mediaElement instanceof GuiIconView) {
@@ -287,6 +287,7 @@ class GalleryTileViewMovementController {
 
    get offset() { return VU.new(this.#offset); }
    get zoom() { return this.#zoomAgent.currentValue; }
+   get zoomStepsInitialized() { return this.#zoomStepsInitialized; }
 
    get contentSize() { return this.#contentSize; }
    set contentSize(value) {
@@ -368,6 +369,8 @@ class GalleryTileViewMovementController {
    #zoomSteps = [{ type: ZoomModes.original, value: 1 }];
    /** @type {boolean} */
    #zoomStepsForFullscreen = false;
+   /** @type {boolean} */
+   #zoomStepsInitialized = false;
    /** @type {ZoomMode} */
    #defaultZoomMode = ZoomModes.smallest;
    /** @type {ZoomMode} */
@@ -579,10 +582,12 @@ class GalleryTileViewMovementController {
          zoomSteps.unshift({ type: ZoomModes.smallest, value: zoomSteps[0].value });         
 
          this.#zoomSteps = zoomSteps;
+         this.#zoomStepsInitialized = true;
          if (resetScaleToDefault || (this.#zoomStepsForFullscreen !== BrowserUtils.isFullscreen)) {
             this.#resetScaleToDefault();
          }
          this.#zoomStepsForFullscreen = BrowserUtils.isFullscreen;
+         this.#onOffsetOrScaleChanged.trigger();
       }
    }
 
