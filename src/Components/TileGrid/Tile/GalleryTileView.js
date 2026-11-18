@@ -84,6 +84,12 @@ export class GalleryTileView extends TileView {
 
       this.#containerResizeObserver.disconnect();
       this.#updateMovementController();
+
+      // Prevent any lingering video elements that sometimes can still be controlled through
+      // the navigator media session after removal
+      if (this.#mediaElement != null && this.#mediaElement instanceof HTMLVideoElement) {
+         this.#mediaElement.src = "";
+      }
    }
 
    #updateMovementController() {
