@@ -170,6 +170,9 @@ export class GalleryTileView extends TileView {
             e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
             e.addEventListener("keydown", args => args.preventDefault());
 
+            s.setProperty("-webkit-user-select", "none");
+            s.userSelect = "none";
+
             e.playsInline = true;
             e.controls = false;
             if (mediaPreviewUrl !== null) {
@@ -188,6 +191,8 @@ export class GalleryTileView extends TileView {
             e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
             s.width = "5em";
             s.color = "#b7b7b7";
+            s.setProperty("-webkit-user-select", "none");
+            s.userSelect = "none";
             e.presenter = new GuiIconPresenter();
             e.presenter.model.icon = "cross-circle";
          }, (e, s) => {
