@@ -14,6 +14,7 @@ import { MediaTypes } from "../../../Shared/MediaTypes.js";
  * @property {string?} [thumbnailType]
  * @property {TileValueType?} [type]
  * @property {string?} [queryTarget]
+ * @property {string?} [querySourceTarget]
  * @property {string?} [sourceUrl]
  */
 
@@ -43,6 +44,8 @@ export class TileValue {
    /** @type {string?} */
    #queryTarget;
    /** @type {string?} */
+   #querySourceTarget;
+   /** @type {string?} */
    #sourceUrl;
    
    get label() { return this.#label; }   
@@ -55,6 +58,7 @@ export class TileValue {
    get mediaPreviewType() { return this.#mediaPreviewType; }
    get type() { return this.#type; }
    get queryTarget() { return this.#queryTarget; }
+   get querySourceTarget() { return this.#querySourceTarget; }
    get sourceUrl() { return this.#sourceUrl; }
 
    get hasMedia() {
@@ -106,6 +110,10 @@ export class TileValue {
       return typeof(this.#queryTarget) === "string";
    }
 
+   get hasQuerySourceTarget() {
+      return typeof(this.#querySourceTarget) === "string";
+   }
+
    get hasLabel() {
       return typeof(this.#label) === "string" && this.#label.trim().length > 0;
    }
@@ -125,6 +133,7 @@ export class TileValue {
       //@ts-ignore
       this.#type = TileValue.#getStringOrNull(initializer?.type);
       this.#queryTarget = TileValue.#getStringOrNull(initializer?.queryTarget);
+      this.#querySourceTarget = TileValue.#getStringOrNull(initializer?.querySourceTarget);
       this.#sourceUrl = TileValue.#getStringOrNull(initializer?.sourceUrl);
    }
 
