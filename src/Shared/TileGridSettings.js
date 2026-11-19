@@ -50,7 +50,8 @@ export class TileGridSettings {
          loopVideos: PU.parseBoolean(g, "loopVideos", null),
          zoomToTop: PU.parseBoolean(g, "zoomToTop", null),
          doubleClickZooms: PU.parseBoolean(g, "doubleClickZooms", null),
-         reverseSeekRolloverOnLoop: PU.parseBoolean(g, "reverseSeekRolloverOnLoop", null)
+         reverseSeekRolloverOnLoop: PU.parseBoolean(g, "reverseSeekRolloverOnLoop", null),
+         hideControlsInitially: PU.parseBoolean(g, "hideControlsInitially", null)
       }));
 
       settings.gallerySettings.muteVideosByDefault = galleryConfig.muteVideosByDefault ??
@@ -63,6 +64,8 @@ export class TileGridSettings {
          settings.gallerySettings.doubleClickZooms;
       settings.gallerySettings.reverseSeekRolloverOnLoop = galleryConfig.reverseSeekRolloverOnLoop ??
          settings.gallerySettings.reverseSeekRolloverOnLoop;
+      settings.gallerySettings.hideControlsInitially = galleryConfig.hideControlsInitially ??
+         settings.gallerySettings.hideControlsInitially;
       
       return settings;
    }
@@ -143,6 +146,12 @@ class GallerySettings {
       this.#reverseSeekRolloverOnLoop = value;
    }
 
+   get hideControlsInitially() { return this.#hideControlsInitially; }
+   set hideControlsInitially(value) {
+      Assert.boolean(value, undefined, true);
+      this.#hideControlsInitially = value;
+   }
+
    /** @type {boolean} */
    #muteVideosByDefault = false;
    /** @type {boolean} */
@@ -153,4 +162,6 @@ class GallerySettings {
    #doubleClickZooms = false;
    /** @type {boolean} */
    #reverseSeekRolloverOnLoop = false;
+   /** @type {boolean} */
+   #hideControlsInitially = false;
 }

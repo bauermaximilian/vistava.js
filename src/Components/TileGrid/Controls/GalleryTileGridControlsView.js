@@ -11,6 +11,7 @@ import { GuiIconView } from "../../GuiIcon/GuiIconView.js";
 import { TileGridView } from "../TileGridView.js";
 import { TileGridControlsView } from "./TileGridControlsView.js";
 import { InputDeviceTypes } from "../../Shared/UserInput/InputDeviceType.js";
+import { GlobalConfiguration } from "../../../Shared/GlobalConfiguration.js";
 
 const tagName = "gallery-grid-controls";
 
@@ -136,11 +137,7 @@ export class GalleryTileGridControlsView extends TileGridControlsView {
 
 		this.#updateManagedMediaContent(this.focussedTile?.mediaContent ?? null);
 
-		let sessionState = BrowserUtils.getSessionState(GalleryTileGridControlsView);
-		if (sessionState !== null && "barsShownInitiallyOnce" in sessionState &&
-			!sessionState.barsShownInitiallyOnce) {
-			sessionState = { barsShownInitiallyOnce: true };
-			BrowserUtils.setSessionState(GalleryTileGridControlsView, sessionState);
+		if (!GlobalConfiguration.tileGridSettings.gallerySettings.hideControlsInitially) {
 			this.#makeBarsVisible();
 		}
 

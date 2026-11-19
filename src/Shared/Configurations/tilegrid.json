@@ -8,7 +8,8 @@
       "loopVideos": true,
       "zoomToTop": true,
       "doubleClickZooms": false,
-      "reverseSeekRolloverOnLoop": false
+      "reverseSeekRolloverOnLoop": false,
+      "hideControlsInitially": false
    },
    "general": {
       "reduceSingleColumnAnimations": true,
