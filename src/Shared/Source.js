@@ -9,8 +9,8 @@ import { AbstractMemberNotImplementedError } from "../Errors/AbstractMemberNotIm
 
 /**
  * Defines a simple configuration object with properties that are used to control the behaviour
- * of the source instance. For the base {@link Source} class, this is just an empty object.
- * @typedef {{}} SourceConfiguration
+ * of the source instance.
+ * @typedef {{name:string|undefined}} SourceConfiguration
  */
 
 /**
@@ -30,11 +30,17 @@ export class Source {
    #configuration = null;
 
    /** 
-    * Gets the name of the current instance, which is the class name by default.
-    * Can be overridden.
-    * @virtual @type {string} 
+    * Gets the name of the current instance.
+    * By default, this is either the value of {@link SourceConfiguration.name} or the class name.
+    * @type {string} 
     */
-   get name() { return this.constructor.name; }
+   get name() {
+      let name = this.#configuration?.name?.toString().trim();
+      if (name == null || name.length === 0) {
+         name = this.constructor.name;
+      }
+      return name;
+   }
 
    /** 
     * Gets the configuration of the current instance, which was provided during instantiation,
