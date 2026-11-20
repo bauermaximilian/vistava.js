@@ -115,10 +115,14 @@ export class ThumbnailTileView extends TileView {
             e.addEventListener("load", this.#handleOnContentLoadingSucceeded, { once: true });
             e.addEventListener("error", this.#handleOnContentLoadingFailed, { once: true });
             e.presenter = this.#thumbnailIconPresenter ??= new GuiIconPresenter();
-            if (type === "SiblingCollection") {
+            if (type === "PlaylistCollection") {
                e.presenter.model.icon = GuiIconNames["collection-play"];
             } else if (type === "ParentCollection") {
                e.presenter.model.icon = GuiIconNames["collection-up"]
+            } else if (type === "LinkedCollection") {
+               e.presenter.model.icon = GuiIconNames["collection-link"]
+            } else if (type === "ExternalCollection") {
+               e.presenter.model.icon = GuiIconNames["collection-net"]
             } else {
                e.presenter.model.icon = GuiIconNames["collection"]
             }

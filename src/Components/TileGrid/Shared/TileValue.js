@@ -19,7 +19,7 @@ import { MediaTypes } from "../../../Shared/MediaTypes.js";
  */
 
 /**
- * @typedef {"Media"|"ChildCollection"|"ParentCollection"|"SiblingCollection"} TileValueType 
+ * @typedef {"Media"|"ChildCollection"|"ParentCollection"|"OrderedCollection"|"LinkedCollection"|"ExternalCollection"} TileValueType 
  */
 
 export class TileValue {

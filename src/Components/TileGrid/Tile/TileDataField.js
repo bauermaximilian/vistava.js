@@ -2,7 +2,7 @@
 
 /** @typedef {keyof(TileDataField)} TileDataFieldKey */
 
-/** @typedef {("Media" | "ChildCollection" | "ParentCollection" | "SiblingCollection")} TileListEntryType */
+/** @typedef {("Media" | "ChildCollection" | "ParentCollection" | "PlaylistCollection" | "LinkedCollection" | "ExternalCollection")} TileListEntryType */
 
 /**
  * Defines a collection of standard keys (with their expected types) of entries within
