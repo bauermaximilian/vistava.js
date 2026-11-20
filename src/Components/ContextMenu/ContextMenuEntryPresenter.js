@@ -80,8 +80,9 @@ export class ContextMenuEntryPresenter {
 
    /**
     * @param {ContextMenuEntryModel} [model]
+    * @param {EventHandler<ContextMenuEntryActivatedEventArgs>} [onActivated]
     */
-   constructor(model) {
+   constructor(model, onActivated) {
       if (model != null) {
          Assert.class(model, ContextMenuEntryModel, "model");
          this.#model = model;
@@ -90,6 +91,10 @@ export class ContextMenuEntryPresenter {
       }
 
       this.onParentPresenterChanged.subscribe(this.#handleOnParentPresenterChanged);
+
+      if (onActivated != null) {
+         this.onActivated.subscribe(onActivated);
+      }
    }
 
    /** @type {EventHandler<import("../../Shared/Event.js").ValueChangedEventArgs<ContextMenuPresenter>>} */
