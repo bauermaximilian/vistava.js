@@ -663,7 +663,7 @@ class TileGridViewMovementController {
       this.#focussedTileOffsetAgent = this.#agents.add(
          c => new AgentArrival({ friction: 40, speed: 1000, maximumVelocity: 10000 }, c));
       this.#positionGuardAgent = this.#agents.add(
-         c => new AgentArrival({ friction: 30, speed: 500, maximumVelocity: 2500 }, c));
+         c => new AgentArrival({ friction: 40, speed: 1000, maximumVelocity: 10000 }, c));
       this.#movementInputOffsetMomentumAgent = this.#agents.add(
          c => new AgentArrivalMomentum({ maximumVelocity: 5000 }, c));
       this.#scrollInputOffsetMomentumAgent = this.#agents.add(
@@ -898,12 +898,30 @@ class TileGridViewMovementController {
          let tileFlowHorizontal = this.#tileGridViewProperties?.tileFlow === TileFlows.horizontal;
          let scrollDistance =
             (gridLength * (tileFlowHorizontal ? args.factor.x : args.factor.y)) - gridLength;
-         this.#scrollInputOffsetAgent.addToCurrentValue(scrollDistance);
-         this.#scrollInputOffsetMomentumAgent.addCharge(scrollDistance);
+         
+         // Try to keep the user from scrolling up more (which triggers the position guard) when 
+         // they already scrolled all the way to the top (but only do this for scroll, not move)
+         let gridStart = (this.#tileGridViewProperties?.gridStart ?? 0);
+         let newGridStart = gridStart + scrollDistance;
+         if (scrollDistance > 0) {
+            if (newGridStart > 0 && gridStart <= 1) {
+               scrollDistance -= newGridStart;
+            }
+            if (gridStart > 1 || Math.abs(scrollDistance) < 5) {
+               scrollDistance = 0;
+            }
+         }
+
+         if (scrollDistance != 0) {
+            this.#scrollInputOffsetAgent.addToCurrentValue(scrollDistance);
+            this.#scrollInputOffsetMomentumAgent.addCharge(scrollDistance);
+         } else {
+            this.#handleOnScrollEnd(null);
+         }
       }
    };
 
-   /** @type {EventHandler<ScrollEndEventArgs>} */
+   /** @type {EventHandler<ScrollEndEventArgs?>} */
    #handleOnScrollEnd = () => {
       // Don't trigger the position guard if another (move) operation is still in progress
       if (!this.#movementInputOffsetMomentumAgent.isCharging) {
