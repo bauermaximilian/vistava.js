@@ -317,7 +317,7 @@ export class TileGridView extends InteractivePresenterView {
          s.position = "absolute";
          s.willChange = "transform, opacity";
          s.transition = GlobalConfiguration.tileGridSettings.generalSettings.reduceFadeInOut ?
-            "" : `opacity 0.3s ease-in-out`;
+            "" : `opacity 0.2s ease-in-out`;
          
          e.presenter = presenter;
          e.inputManager = this.inputManager;
